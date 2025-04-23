@@ -1,5 +1,6 @@
 package cn.com.edtechhub.workmassivelikes.service.impl;
 
+import cn.com.edtechhub.workmassivelikes.contant.ThumbConstant;
 import cn.com.edtechhub.workmassivelikes.mapper.BlogMapper;
 import cn.com.edtechhub.workmassivelikes.model.dto.BlogDto;
 import cn.com.edtechhub.workmassivelikes.model.entity.Blog;
@@ -15,6 +16,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -38,6 +40,12 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements Bl
     @Lazy // 由于需要在 thumbService 内部依赖 blogService, 因此懒加载避免循环依赖
     ThumbService thumbService;
 
+    /**
+     * 注入 Redis 客户端
+     */
+    @Resource
+    RedisTemplate<String, Object> redisTemplate;
+
     @Override
     public List<Blog> blogSearch(BlogSearchRequest blogSearchRequest) {
         // 先获取到数据中的所有博文记录
@@ -52,19 +60,37 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements Bl
         List<Blog> blogList = this.blogSearch(blogSearchRequest);
 
         // 查询当前用户对所有文章列表的点赞情况(提前从数据中获取所有的点赞记录, 避免每篇文章都需要遍历查询一次)
-        Map<Long, Boolean> blogIdHasThumbMap = new HashMap<>();
+        Map<Long, Boolean> blogIdHasThumbMap = new HashMap<>(); // 由博文 id 和当前用户是否点赞组成
 
-        Set<Long> blogIdSet = blogList
+//        Set<Long> blogIdSet = blogList
+//                .stream()
+//                .map(Blog::getId)
+//                .collect(Collectors.toSet()); // 获取博文 id 集合
+//
+//        List<Thumb> thumbList = thumbService.lambdaQuery()
+//                .eq(Thumb::getUserId, Long.valueOf(userService.userStatus().getUserId()))
+//                .in(Thumb::getBlogId, blogIdSet) // 在博文 id 集合中查询
+//                .list(); // 最终过滤得到和当前用户关联的点赞列表
+//
+//        thumbList.forEach(thumb -> blogIdHasThumbMap.put(thumb.getBlogId(), true)); // 最终获取到博文 id 和当前用户对对应文章是否点赞的 map
+
+        // 改为在 Redis 中进行点赞情况查询
+        List<Object> blogIdList = blogList
                 .stream()
-                .map(Blog::getId)
-                .collect(Collectors.toSet()); // 获取博文 id 集合
+                .map(blog -> blog.getId().toString())
+                .collect(Collectors.toList()); // 先获取当前用户的对应键值对 hash 的列表
 
-        List<Thumb> thumbList = thumbService.lambdaQuery()
-                .eq(Thumb::getUserId, Long.valueOf(userService.userStatus().getUserId()))
-                .in(Thumb::getBlogId, blogIdSet) // 在博文 id 集合中查询
-                .list(); // 最终过滤得到和当前用户关联的点赞列表
+        List<Object> thumbList = redisTemplate.opsForHash().multiGet( // multiGet 即是对 hMGet 命令的封装
+                ThumbConstant.USER_THUMB_KEY_PREFIX + userService.userStatus().getUserId(), // 键名
+                blogIdList // 需要查询的 field 组成的列表
+        ); // 到这里就获取到 Redis 中的当前用户对于所有的博客的点赞情况
 
-        thumbList.forEach(thumb -> blogIdHasThumbMap.put(thumb.getBlogId(), true)); // 最终获取到博文 id 和当前用户对对应文章是否点赞的 map
+        for (int i = 0; i < thumbList.size(); i++) {
+            if (thumbList.get(i) == null) {
+                continue; // 这里其实也可以选择设置为 false, 不过为了节约空间, 选择不理会也是值得的
+            }
+            blogIdHasThumbMap.put(Long.valueOf(blogIdList.get(i).toString()), true);
+        }
 
         return blogList
                 .stream()
@@ -73,7 +99,8 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements Bl
                     blogDto.setHasThumb(blogIdHasThumbMap.get(blog.getId()));
                     return blogDto;
                 })
-                .toList();
+                .toList()
+                ;
     }
 
     @Override

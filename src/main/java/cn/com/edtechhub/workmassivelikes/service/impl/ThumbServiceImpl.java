@@ -38,6 +38,12 @@ import org.springframework.transaction.support.TransactionTemplate;
    通过 hexists(检查是否存在指定字段) 可以判断用户是否给某篇文章点过赞
    通过 hmget(批量获取多个指定 field 的对应值) 可以获取用户对应文章的点赞数据, 注意 hvals 获取的是所有 field 的对应值
    通过 hset(给 hash key 添加新的 field) 添加新点赞
+
+   但是这么做还是有些隐患, 我们没有设置过期时间,
+   并且 Redis 不支持对 hash 字段进行内部字段的过期时间
+
+   如果 Redis 挂掉, 所有的点赞记录虽然还持久在 MySQL 中, 但是还是需要重新塑造键值对,
+   否则下次用户查询列表就无法获取自己是否点赞的记录了
 */
 
 /**
