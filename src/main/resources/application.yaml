@@ -1,0 +1,67 @@
+# 配置框架(使用 java -jar app.jar --spring.profiles.active=develop | release | production 来启动项目, 其中 release 有时间就拿来测试, 而 production 存储在 Github 上, 每次修改 Github 配置就需要刷新(这个有时间可以优化为无需重启))
+spring:
+  ## 配置环境
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:develop} # 默认启动开发环境
+  ## 配置名称
+  application:
+    name: work-massive-likes
+  ## 配置数源
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/work_massive_likes
+    username: wml
+    password: Qwe54188_
+  ## 配置视图
+  mvc:
+    servlet:
+      path: /work_massive_likes_api
+
+# 配置服务
+server:
+  ## 配置地址
+  address: 127.0.0.1
+  ## 配置端口
+  port: 8000
+
+# 配置文档
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+      packages-to-scan: cn.com.edtechhub.workmassivelikes.controller
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+
+# 配置 MyBatisPlus
+mybatis-plus:
+  ## 配置盐值
+  salt: work-user-centre
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# 配置 sa-token
+sa-token: # 默认开启 Redis 配置将自动支持 Sa-token 使用 Redis 存储认证相关键值对, 想要关掉需要去除相关依赖
+  ## token 名称
+  token-name: work-massive-likes # 同时也是 cookie 名称
+  ## token 有效期
+  timeout: 2592000 # 单位为秒, 默认 30 天, -1 代表永久有效
+  ## token 最低活跃频率
+  active-timeout: -1 # 单位:为秒, 如果 token 超过此时间没有访问系统就会被冻结, 默认 -1 代表不限制, 永不冻结
+  ## token 共享
+  is-share: false # 在多人登录同一账号时, 是否共用一个 token(为 true 时所有登录共用一个 token, 为 false 时每次登录新建一个 token)
+  ## 是否允许同一账号多地同时登录
+  is-concurrent: false # 为 true 时允许一起登录, 为 false 时新登录挤掉旧登录
+  ## token 风格
+  token-style: uuid # 默认可取值: uuid、simple-uuid、random-32、random-64、random-128、tik
+  ## 是否输出操作日志
+  is-log: true

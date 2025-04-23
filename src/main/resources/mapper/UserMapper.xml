@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.edtechhub.workmassivelikes.mapper.UserMapper">
+
+    <resultMap id="BaseResultMap" type="cn.com.edtechhub.workmassivelikes.model.entity.User">
+            <id property="id" column="id" />
+            <result property="account" column="account" />
+            <result property="wxUnion" column="wx_union" />
+            <result property="mpOpen" column="mp_open" />
+            <result property="email" column="email" />
+            <result property="phone" column="phone" />
+            <result property="ident" column="ident" />
+            <result property="passwd" column="passwd" />
+            <result property="avatar" column="avatar" />
+            <result property="tags" column="tags" />
+            <result property="nick" column="nick" />
+            <result property="name" column="name" />
+            <result property="profile" column="profile" />
+            <result property="birthday" column="birthday" />
+            <result property="country" column="country" />
+            <result property="address" column="address" />
+            <result property="role" column="role" />
+            <result property="level" column="level" />
+            <result property="gender" column="gender" />
+            <result property="deleted" column="deleted" />
+            <result property="createTime" column="create_time" />
+            <result property="updateTime" column="update_time" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,account,wx_union,mp_open,email,phone,
+        ident,passwd,avatar,tags,nick,
+        name,profile,birthday,country,address,
+        role,level,gender,deleted,create_time,
+        update_time
+    </sql>
+</mapper>
