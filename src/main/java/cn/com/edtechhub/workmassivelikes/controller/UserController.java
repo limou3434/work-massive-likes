@@ -8,7 +8,7 @@ import cn.com.edtechhub.workmassivelikes.request.*;
 import cn.com.edtechhub.workmassivelikes.response.BaseResponse;
 import cn.com.edtechhub.workmassivelikes.response.TheResult;
 import cn.com.edtechhub.workmassivelikes.service.UserService;
-import cn.com.edtechhub.workmassivelikes.utils.DeviceUtils;
+import cn.com.edtechhub.workmassivelikes.utils.DeviceUtil;
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaCheckRole;
 import cn.dev33.satoken.annotation.SaIgnore;
@@ -106,7 +106,7 @@ public class UserController { // 通常控制层有服务层中的所有方法, 
     @SaIgnore
     @PostMapping("/login")
     public BaseResponse<UserVO> userLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request) {
-        User user = userService.userLogin(userLoginRequest.getAccount(), userLoginRequest.getPasswd(), DeviceUtils.getRequestDevice(request)); // 这里同时解析用户的设备, 以支持同端互斥
+        User user = userService.userLogin(userLoginRequest.getAccount(), userLoginRequest.getPasswd(), DeviceUtil.getRequestDevice(request)); // 这里同时解析用户的设备, 以支持同端互斥
         UserVO userVo = UserVO.removeSensitiveData(user);
         return TheResult.success(CodeBindMessage.SUCCESS, userVo);
     }
@@ -117,7 +117,7 @@ public class UserController { // 通常控制层有服务层中的所有方法, 
     @SaCheckLogin
     @PostMapping("/logout")
     public BaseResponse<Boolean> userLogout(HttpServletRequest request) {
-        Boolean result = userService.userLogout(DeviceUtils.getRequestDevice(request));
+        Boolean result = userService.userLogout(DeviceUtil.getRequestDevice(request));
         return TheResult.success(CodeBindMessage.SUCCESS, result);
     }
 

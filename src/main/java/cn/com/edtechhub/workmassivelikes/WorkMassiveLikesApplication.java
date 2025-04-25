@@ -20,7 +20,7 @@
 package cn.com.edtechhub.workmassivelikes;
 
 import cn.com.edtechhub.workmassivelikes.config.ServerConfig;
-import cn.com.edtechhub.workmassivelikes.config.SpringDocConfig;
+import cn.com.edtechhub.workmassivelikes.config.OpenApiConfig;
 import cn.dev33.satoken.SaManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
@@ -38,10 +38,10 @@ public class WorkMassiveLikesApplication {
     public static void main(String[] args) {
         var context = SpringApplication.run(WorkMassiveLikesApplication.class, args);
         ServerConfig serverConfig = context.getBean(ServerConfig.class);
-        SpringDocConfig springdocConfig = context.getBean(SpringDocConfig.class);
+        OpenApiConfig springdocConfig = context.getBean(OpenApiConfig.class);
         String baseUrl = "http://" + serverConfig.getAddress() + ":" + serverConfig.getPort() + serverConfig.getContextPath();
         log.info("Spring Boot running...");
-        log.info("访问 {} 或 {} 即可得到在线文档, 访问 {} 即可得到文档配置", baseUrl + springdocConfig.getKnife4jUi(), baseUrl + springdocConfig.getSwaggerUi(), baseUrl + springdocConfig.getApiDocs());
+        log.info("访问 {} 或 {} 即可得到在线文档, 访问 {} 即可得到文档配置", baseUrl + springdocConfig.getKnife4jUi(), baseUrl + springdocConfig.getSwaggerUi(), baseUrl + springdocConfig.getApiDocsJson());
         log.debug("读取 Sa-token 配置查验是否正确: {}", SaManager.getConfig());
         log.debug("读取 Sa-token 切面类查验是否被替换为自己的: {}", SaManager.getStpInterface());
     }

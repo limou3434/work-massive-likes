@@ -13,11 +13,21 @@ public interface ThumbService extends IService<Thumb> {
     /**
      * 确认点赞
      */
-    Boolean thumbAddDo(Long blogId);
+    Boolean thumbAddDoUseMySQL(Long blogId);
 
     /**
      * 取消点赞
      */
-    Boolean thumbAddUnDo(Long blogId);
+    Boolean thumbAddUnDoUseMySQL(Long blogId);
+
+    /**
+     * 确认点赞
+     */
+    Boolean thumbAddDoUseRedis(Long blogId);
+
+    /**
+     * 取消点赞
+     */
+    Boolean thumbAddUnDoUseRedis(Long blogId);
 
 }

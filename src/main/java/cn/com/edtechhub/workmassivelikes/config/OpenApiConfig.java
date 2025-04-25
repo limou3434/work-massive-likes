@@ -7,8 +7,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @Data
-@ConfigurationProperties(prefix = "springdoc")
-public class SpringDocConfig {
+public class OpenApiConfig {
 
     /**
      * Knife4j Ui 在线文档地址
@@ -18,13 +17,11 @@ public class SpringDocConfig {
     /**
      * Swagger Ui 在线文档地址
      */
-    @Value("${springdoc.swagger-ui.path}")
-    private String swaggerUi;
+    private String swaggerUi = "/swagger-ui/index.html";
 
     /**
-     * 配置文档地址
+     * 配置文档 json 地址
      */
-    @Value("${springdoc.api-docs.path}")
-    private String apiDocs;
+    private String apiDocsJson = "/v3/api-docs";
 
 }

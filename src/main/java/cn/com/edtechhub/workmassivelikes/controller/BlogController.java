@@ -29,13 +29,6 @@ public class BlogController {
     @Resource
     private BlogService blogService;
 
-    @Lazy // 解决循环引用问题, 因为后续 ThumbService 的开发也需要引入 UserService 作为依赖
-    @Resource
-    private ThumbService thumbService;
-
-    @Resource
-    private UserService userService;
-
     /**
      * 查询博文
      */
