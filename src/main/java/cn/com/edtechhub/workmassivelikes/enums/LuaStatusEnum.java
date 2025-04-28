@@ -17,6 +17,7 @@ public enum LuaStatusEnum {
      * 执行失败
      */
     FAIL(-1L),
+
     ;
 
     private final long value;

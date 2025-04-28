@@ -6,6 +6,10 @@ spring:
   ## 配置名称
   application:
     name: work-massive-likes
+  ## 页面刷新
+  devtools:
+    livereload:
+      enabled: false # 取消刷新
   ## 配置数源
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -48,6 +52,12 @@ server:
   ## 配置端口
   port: 8000
 
+# 配置日志
+logging:
+  level:
+    # root: DEBUG # 如果需要仔细调试可以打开这个选项
+    cn.com.edtechhub.workmassivelikes: DEBUG # 控制本项目包内的日志输出等级 TRACE | DEBUG | INFO | WARN | ERROR | FATAL
+
 # 配置文档
 springdoc:
   swagger-ui:
@@ -73,7 +83,7 @@ mybatis-plus:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
-# 配置 sa-token
+# 配置 Sa-Token
 sa-token: # 默认开启 Redis 配置将自动支持 Sa-token 使用 Redis 存储认证相关键值对, 想要关掉需要去除相关依赖
   ## token 名称
   token-name: work-massive-likes # 同时也是 cookie 名称

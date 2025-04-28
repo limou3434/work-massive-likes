@@ -20,4 +20,28 @@
         id,user_id,title,cover_img,content,thumb_count,
         deleted,create_time,update_time
     </sql>
+
+    <update id="batchUpdateThumbCount">
+        UPDATE blog <!-- UPDATE 表示要开始修改 blog 表里的数据 -->
+        SET thumb_count = thumb_count + CASE id <!-- CASE 是条件语句, CASE id 会根据 id 的值来得到最终的值, 这个 id 来源于下面的动态语句中的 key -->
+        <foreach collection="countMap.entrySet()" item="value" index="key"> <!-- collection 指定一个 Java 对象, entrySet() 直接获取键值对集合 -->
+            WHEN #{key} THEN #{value}
+        </foreach>
+        END <!-- 结束修改 -->
+        WHERE id IN
+        <foreach collection="countMap.keySet()" item="id" open="(" separator="," close=")"> <!-- keySet() 只获得键集合 -->
+            #{id}
+        </foreach>
+    </update>
+    <!--
+    对于 countMap=<1,5>, <2,3>, <3,10> 最终生成类似下面的语句
+    UPDATE blog
+    SET thumb_count = thumb_count + CASE id
+        WHEN 1 THEN 5
+        WHEN 2 THEN 3
+        WHEN 3 THEN 10
+    END
+    WHERE id IN (1, 2, 3);
+    -->
+
 </mapper>

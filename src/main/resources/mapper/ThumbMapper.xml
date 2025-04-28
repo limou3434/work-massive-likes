@@ -16,4 +16,5 @@
     <sql id="Base_Column_List">
         id,user_id,blog_id,deleted,create_time,update_time
     </sql>
+
 </mapper>

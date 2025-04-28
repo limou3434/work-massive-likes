@@ -22,6 +22,7 @@ public enum ThumbTypeEnum {
      * 毫无改变
      */
     NON(0),
+
     ;
 
     private final int value;

@@ -2,6 +2,9 @@ package cn.com.edtechhub.workmassivelikes.service;
 
 import cn.com.edtechhub.workmassivelikes.model.entity.Thumb;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.Map;
 
 /**
  * @author Limou
@@ -11,22 +14,22 @@ import com.baomidou.mybatisplus.extension.service.IService;
 public interface ThumbService extends IService<Thumb> {
 
     /**
-     * 确认点赞
+     * 确认点赞(基于 MySQL)
      */
     Boolean thumbAddDoUseMySQL(Long blogId);
 
     /**
-     * 取消点赞
+     * 取消点赞(基于 MySQL)
      */
     Boolean thumbAddUnDoUseMySQL(Long blogId);
 
     /**
-     * 确认点赞
+     * 确认点赞(基于 Redis)
      */
     Boolean thumbAddDoUseRedis(Long blogId);
 
     /**
-     * 取消点赞
+     * 取消点赞(基于 Redis)
      */
     Boolean thumbAddUnDoUseRedis(Long blogId);
 

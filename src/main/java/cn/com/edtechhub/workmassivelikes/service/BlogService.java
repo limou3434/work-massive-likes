@@ -4,8 +4,10 @@ import cn.com.edtechhub.workmassivelikes.model.dto.BlogDto;
 import cn.com.edtechhub.workmassivelikes.model.entity.Blog;
 import cn.com.edtechhub.workmassivelikes.request.*;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 /**
 * @author Limou
