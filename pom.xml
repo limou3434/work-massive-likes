@@ -66,18 +66,18 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- MySQL -->
-        <dependency>
-            <groupId>com.mysql</groupId>
-            <artifactId>mysql-connector-j</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-
         <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
+        </dependency>
+
+        <!-- MySQL -->
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <scope>runtime</scope>
         </dependency>
 
         <!-- Redis -->
@@ -90,14 +90,23 @@
             <artifactId>spring-boot-starter-data-redis</artifactId>
             <exclusions>
                 <exclusion>
+                    <!-- 排除默认引入 lettuce-core -->
                     <artifactId>lettuce-core</artifactId>
                     <groupId>io.lettuce</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
         <dependency>
+            <!-- 使用 jedis 作为新的 Redis 客户端 -->
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
+        </dependency>
+
+        <!-- Caffeine -->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+            <version>3.1.8</version>
         </dependency>
 
         <!-- Hutool -->

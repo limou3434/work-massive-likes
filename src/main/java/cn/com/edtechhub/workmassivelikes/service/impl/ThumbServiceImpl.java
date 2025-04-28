@@ -1,7 +1,6 @@
 package cn.com.edtechhub.workmassivelikes.service.impl;
 
 import cn.com.edtechhub.workmassivelikes.contant.LuaScriptConstant;
-import cn.com.edtechhub.workmassivelikes.contant.ThumbConstant;
 import cn.com.edtechhub.workmassivelikes.enums.CodeBindMessage;
 import cn.com.edtechhub.workmassivelikes.enums.LuaStatusEnum;
 import cn.com.edtechhub.workmassivelikes.exception.BusinessException;
@@ -21,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.Arrays;
-import java.util.Map;
 
 /*
 点赞逻辑是整个项目的优化重点:
@@ -88,16 +86,32 @@ import java.util.Map;
    (10)在点赞发生意外时, 处理这种异常情况...
 
 4. [增加补偿机制]
-    一些极限情况下, 比如 "在即将同步临时记录到数据库里时, Redis 宕机了", 系统异常将导致数据不一致问题, 因为我们上面的设计是根据时间片来备份到 MySQL 中的, 可能会出现备份时部分旧的分片没有被备份, 我们还需要实现一个补偿任务, 在 job 包下创建 SyncThumb2DBCompensatory
+   一些极限情况下, 比如 "在即将同步临时记录到数据库里时, Redis 宕机了", 系统异常将导致数据不一致问题, 因为我们上面的设计是根据时间片来备份到 MySQL 中的, 可能会出现备份时部分旧的分片没有被备份, 我们还需要实现一个补偿任务, 在 job 包下创建 SyncThumb2DBCompensatory
 
-5. []
+5. [多级缓存优化]
+   在访问速度问题上, 我们还可以使用多级缓存问题来进一步提高访问速度
+   (1)一级缓存 Caffeine, 这里保存访问最高频的数据, 响应速度最快(Caffeine 将数据直接存储在 JVM 堆内存, 并且由于是基于本地的缓存机制, 很少网络开销)
+   (2)二级缓存 Redis, 这里保存访问次数较多的数据, 响应速度较快(Redis 是基于内存的缓存机制, 但是由于 Redis 是基于网络的, 因此网络开销比较大)
+   (3)三级缓存 MySQL, 最终存储层, 保证数据的持久化和完整性
 
-6. [修复非法点赞]
+6. [超级热点优化]
+   我们通过引入 Redis 解决了点赞系统的数据库读写压力问题, 虽然 Redis 性能优于 MySQL, 但在高并发场景下, Redis 也可能成为系统瓶颈:
+   (1)单点热点问题: 某些热门内容(如爆款博客)会被大量用户同时点赞, Redis 服务器压力激增
+   (2)恶意用户刷量: 某些恶意用户用脚本超高频率刷点赞接口, 导致对应的 hash 中的某个 key 成为超级热点, 影响正常用户的请求响应
+   这些问题在流量高峰期尤为明显, 可能导致系统响应变慢, 甚至服务不可用, 我们需要进一步优化用户是否已点赞的逻辑, 减轻 Redis 的压力
+   因此我们可以一步一步来自己实现 HeavyKeeper 算法后, 再引入现有的框架 hotkey
+
+   HeavyKeeper 是一种高效的流式 TopK 检测算法, 专为识别大规模数据流中的频繁项(热点 Key)而生, 它基于 Count-Min Sketch 算法改进, 主要通过以下组件实现:
+   (1)二维数组: 算法维护一个 d*w 二维数组, 里面有 d 层, 每层里有 w 个桶, 桶里记录哈希指纹和计数值
+   (2)衰减机制: 核心创新点, 当发生哈希冲突时, 不是简单的覆盖, 而是通过概率衰减原有计数
+   (3)小堆结构: 维护一个大小为 k 的最小堆, 用于记录当前观测到的 TopK 项
+
+7. [修复非法点赞]
    由于我们跳过了一层数据库的校验, 把点赞的逻辑直接迁移到了 Redis 中, 然后开启定期的备份, 但此时无法校验接口中的 blogId 是否存在, 这会导致用户理论上来说可以对不存在的文章进行点赞
    查一次数据库校验在目前阶段肯定是不太合理了, 读一次库的时间都会超过我们写 Redis 的时间, 影响到系统的并发
    可以通过额外存储在 Redis 中的 String 结构来判断博客是否存在, 并且在 Lua 脚本里加一次判断即可
 
-7. [优化过期时间]
+8. [优化过期时间]
    但是这么做还是有些隐患, 我们没有设置过期时间, 并且 Redis 不支持对 hash 字段进行内部字段的过期时间
    只需要在 hash 的 blog_id 字段值修改为 "{"thumbId": "xxx", "expireTime": xxxxxxxxx}" 的 json 即可, 然后使用异步判断缓存是否过期, 大致流程如下:
    (1)用户初次点赞, 会在 Redis 中添加记录, 同时设置时间戳
