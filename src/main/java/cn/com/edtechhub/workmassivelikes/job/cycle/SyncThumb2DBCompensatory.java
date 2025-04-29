@@ -29,6 +29,7 @@ public class SyncThumb2DBCompensatory {
     @Scheduled(cron = "0 0 2 * * *") // 每天凌晨 2 点执行一次
     public void run() {
         log.debug("开始补偿临时数据");
+
         Set<String> thumbKeys = redisTemplate.keys(RedisKeyUtil.getTempThumbKey("") + "*"); // 获取所有临时点赞记录, 也就是 thumb:temp:%s*
         Set<String> needHandleDataSet = new HashSet<>();
         thumbKeys
