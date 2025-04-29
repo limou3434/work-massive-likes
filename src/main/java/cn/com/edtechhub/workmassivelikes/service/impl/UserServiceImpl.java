@@ -2,7 +2,7 @@ package cn.com.edtechhub.workmassivelikes.service.impl;
 
 import cn.com.edtechhub.workmassivelikes.config.MyBatisPlusConfig;
 import cn.com.edtechhub.workmassivelikes.contant.UserConstant;
-import cn.com.edtechhub.workmassivelikes.enums.CodeBindMessage;
+import cn.com.edtechhub.workmassivelikes.enums.CodeBindMessageEnum;
 import cn.com.edtechhub.workmassivelikes.exception.BusinessException;
 import cn.com.edtechhub.workmassivelikes.mapper.UserMapper;
 import cn.com.edtechhub.workmassivelikes.model.dto.UserDto;
@@ -49,7 +49,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         try {
             this.save(user);
         } catch (DuplicateKeyException e) {
-            throw new BusinessException(CodeBindMessage.OPERATION_ERROR, "已经存在该用户, 或者曾经被删除");
+            throw new BusinessException(CodeBindMessageEnum.OPERATION_ERROR, "已经存在该用户, 或者曾经被删除");
         }
         return user;
     }
@@ -57,7 +57,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     @Override
     public Boolean userDelete(UserDeleteRequest userDeleteRequest) {
         if (userDeleteRequest.getId() == null || userDeleteRequest.getId() <= 0) {
-            throw new BusinessException(CodeBindMessage.PARAMS_ERROR, "参数用户 id 不合法");
+            throw new BusinessException(CodeBindMessageEnum.PARAMS_ERROR, "参数用户 id 不合法");
         }
         return this.removeById(userDeleteRequest.getId()); // 这里 MyBatisPlus 会自动转化为逻辑删除
     }
@@ -65,7 +65,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     @Override
     public User userUpdate(UserUpdateRequest userUpdateRequest) { // TODO: 全量更新还是有点底效率
         if (userUpdateRequest.getId() == null || userUpdateRequest.getId() <= 0) {
-            throw new BusinessException(CodeBindMessage.PARAMS_ERROR, "参数用户 id 不合法");
+            throw new BusinessException(CodeBindMessageEnum.PARAMS_ERROR, "参数用户 id 不合法");
         }
         User user = new User();
         BeanUtils.copyProperties(userUpdateRequest, user);
@@ -119,7 +119,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     public Boolean userRegister(String account, String passwd, String checkPasswd) {
         checkAccountAndPasswd(account, passwd);
         if (!passwd.equals(checkPasswd)) {
-            throw new BusinessException(CodeBindMessage.PARAMS_ERROR, "两次输入的密码不一致");
+            throw new BusinessException(CodeBindMessageEnum.PARAMS_ERROR, "两次输入的密码不一致");
         }
         UserAddRequest userAddRequest = new UserAddRequest();
         userAddRequest.setAccount(account);
@@ -138,7 +138,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         lambdaQueryWrapper.eq(User::getAccount, account).eq(User::getPasswd, DigestUtils.md5DigestAsHex((mybatisPlusConfig.getSalt() + passwd).getBytes()));
         User user = this.getOne(lambdaQueryWrapper);
         if (user == null) {
-            throw new BusinessException(CodeBindMessage.PARAMS_ERROR, "该用户可能不存在, 也可能是密码错误");
+            throw new BusinessException(CodeBindMessageEnum.PARAMS_ERROR, "该用户可能不存在, 也可能是密码错误");
         }
 
         // 先检查是否被封号再来登录
@@ -175,24 +175,24 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     private void checkAccountAndPasswd(String checkAccount, String checkPasswd) {
         // 账户和密码都不能为空
         if (StringUtils.isAllBlank(checkAccount)) {
-            throw new BusinessException(CodeBindMessage.PARAMS_ERROR, "账户为空");
+            throw new BusinessException(CodeBindMessageEnum.PARAMS_ERROR, "账户为空");
         }
         if (StringUtils.isAllBlank(checkPasswd)) {
-            throw new BusinessException(CodeBindMessage.PARAMS_ERROR, "密码为空");
+            throw new BusinessException(CodeBindMessageEnum.PARAMS_ERROR, "密码为空");
         }
 
         // 判断账户和密码的长度是否符合要求
         if (checkAccount.length() < UserConstant.ACCOUNT_LENGTH) {
-            throw new BusinessException(CodeBindMessage.PARAMS_ERROR, "账户不得小于" + UserConstant.ACCOUNT_LENGTH + "位");
+            throw new BusinessException(CodeBindMessageEnum.PARAMS_ERROR, "账户不得小于" + UserConstant.ACCOUNT_LENGTH + "位");
         }
         if (checkPasswd.length() < UserConstant.PASSWD_LENGTH) {
-            throw new BusinessException(CodeBindMessage.PARAMS_ERROR, "密码不得小于" + UserConstant.PASSWD_LENGTH + "位");
+            throw new BusinessException(CodeBindMessageEnum.PARAMS_ERROR, "密码不得小于" + UserConstant.PASSWD_LENGTH + "位");
         }
 
         // 避免账户和密码中的非法字符
         String validPattern = "^[$_-]+$";
         if (checkAccount.matches(validPattern)) {
-            throw new BusinessException(CodeBindMessage.PARAMS_ERROR, "账号不能包含特殊字符");
+            throw new BusinessException(CodeBindMessageEnum.PARAMS_ERROR, "账号不能包含特殊字符");
         }
     }
 

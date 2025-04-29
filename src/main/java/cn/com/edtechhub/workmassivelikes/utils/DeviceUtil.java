@@ -1,6 +1,6 @@
 package cn.com.edtechhub.workmassivelikes.utils;
 
-import cn.com.edtechhub.workmassivelikes.enums.CodeBindMessage;
+import cn.com.edtechhub.workmassivelikes.enums.CodeBindMessageEnum;
 import cn.com.edtechhub.workmassivelikes.exception.BusinessException;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.Header;
@@ -29,7 +29,7 @@ public class DeviceUtil {
         // 使用 Hutool 解析 UserAgent
         UserAgent userAgent = UserAgentUtil.parse(userAgentStr);
         if (userAgent == null) {
-            throw new BusinessException(CodeBindMessage.PARAMS_ERROR, "禁止隐藏设备类型");
+            throw new BusinessException(CodeBindMessageEnum.PARAMS_ERROR, "禁止隐藏设备类型");
         }
 
         log.debug("检测一次原始的 HTTP 设备信息 {}", userAgentStr);

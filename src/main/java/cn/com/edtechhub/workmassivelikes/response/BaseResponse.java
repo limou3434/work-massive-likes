@@ -1,6 +1,6 @@
 package cn.com.edtechhub.workmassivelikes.response;
 
-import cn.com.edtechhub.workmassivelikes.enums.CodeBindMessage;
+import cn.com.edtechhub.workmassivelikes.enums.CodeBindMessageEnum;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -32,24 +32,24 @@ public class BaseResponse<T> implements Serializable {
     /**
      * 外部构造方法, 快速封装 成功 响应体
      *
-     * @param codeBindMessage 错误-含义 枚举体
+     * @param codeBindMessageEnum 错误-含义 枚举体
      * @param data 数据
      */
-    public BaseResponse(CodeBindMessage codeBindMessage, T data) {
-        this.code = codeBindMessage.getCode();
-        this.message = codeBindMessage.getMessage();
+    public BaseResponse(CodeBindMessageEnum codeBindMessageEnum, T data) {
+        this.code = codeBindMessageEnum.getCode();
+        this.message = codeBindMessageEnum.getMessage();
         this.data = data;
     }
 
     /**
      * 外部构造方法, 快速封装 错误 响应体
      *
-     * @param codeBindMessage 错误-含义 枚举体
+     * @param codeBindMessageEnum 错误-含义 枚举体
      * @param message 消息
      */
-    public BaseResponse(CodeBindMessage codeBindMessage, String message) {
-        this.code = codeBindMessage.getCode();
-        this.message = codeBindMessage.getMessage() + ": " + message;
+    public BaseResponse(CodeBindMessageEnum codeBindMessageEnum, String message) {
+        this.code = codeBindMessageEnum.getCode();
+        this.message = codeBindMessageEnum.getMessage() + ": " + message;
         this.data = null;
     }
 

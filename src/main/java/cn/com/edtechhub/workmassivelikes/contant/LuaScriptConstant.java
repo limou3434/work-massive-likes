@@ -6,7 +6,7 @@ import org.springframework.data.redis.core.script.RedisScript;
 public class LuaScriptConstant {
 
     /**
-     * 确认点赞 Lua 脚本
+     * 确认点赞 Lua 脚本(携带临时键值对)
      */
     public static final RedisScript<Long> THUMB_SCRIPT = new DefaultRedisScript<>("""  
             local tempThumbKey = KEYS[1] -- 临时点赞记录键名(如 thumb:temp:{time_slice}) => thumb:temp:11:20:00 -> "01:001=-1", "01:002=1"
@@ -34,7 +34,7 @@ public class LuaScriptConstant {
             """, Long.class);
 
     /**
-     * 取消点赞 Lua 脚本
+     * 取消点赞 Lua 脚本(携带临时键值对)
      */
     public static final RedisScript<Long> UNTHUMB_SCRIPT = new DefaultRedisScript<>("""  
             local tempThumbKey = KEYS[1] -- 临时点赞记录键名(如 thumb:temp:{time_slice}) => thumb:temp:11:20:00 -> "01:001=-1", "01:002=1"
@@ -59,5 +59,39 @@ public class LuaScriptConstant {
             redis.call('HDEL', userThumbKey, blogId)             -- 删除用户点赞记录键值对
             
             return 1  -- 返回 1 表示成功
+            """, Long.class);
+
+    /**
+     * 确认点赞 Lua 脚本(不携带临时键值对)
+     */
+    public static final RedisScript<Long> THUMB_SCRIPT_MQ = new DefaultRedisScript<>("""  
+            local userThumbKey = KEYS[1] -- 用户点赞记录键名(如 thumb:{user_id})         =>            thumb:01 -> "001=1", "002=1"
+            local blogId = ARGV[1]       -- 博客 ID
+            
+            -- 1. 检查是否已经取消点赞(避免重复操作)
+            if redis.call("HEXISTS", userThumbKey, blogId) == 1 then
+                return -1
+            end
+            
+            -- 2. 添加点赞记录
+            redis.call("HSET", userThumbKey, blogId, 1)
+            return 1
+            """, Long.class);
+
+    /**
+     * 取消点赞 Lua 脚本(不携带临时键值对)
+     */
+    public static final RedisScript<Long> UNTHUMB_SCRIPT_MQ = new DefaultRedisScript<>("""  
+            local userThumbKey = KEYS[1] -- 用户点赞记录键名(如 thumb:{user_id})         =>            thumb:01 -> "001=1", "002=1"
+            local blogId = ARGV[1]       -- 博客 ID
+            
+            -- 1. 检查是否已经取消点赞(避免重复操作)
+            if redis.call("HEXISTS", userThumbKey, blogId) == 0 then
+                return -1
+            end
+            
+            -- 2. 删除点赞记录
+            redis.call("HDEL", userThumbKey, blogId)
+            return 1
             """, Long.class);
 }

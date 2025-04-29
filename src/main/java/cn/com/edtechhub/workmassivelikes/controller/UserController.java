@@ -1,6 +1,6 @@
 package cn.com.edtechhub.workmassivelikes.controller;
 
-import cn.com.edtechhub.workmassivelikes.enums.CodeBindMessage;
+import cn.com.edtechhub.workmassivelikes.enums.CodeBindMessageEnum;
 import cn.com.edtechhub.workmassivelikes.model.dto.UserDto;
 import cn.com.edtechhub.workmassivelikes.model.entity.User;
 import cn.com.edtechhub.workmassivelikes.model.vo.UserVO;
@@ -43,7 +43,7 @@ public class UserController { // 通常控制层有服务层中的所有方法, 
     @PostMapping("/add")
     public BaseResponse<User> userAdd(@RequestBody UserAddRequest userAddRequest) {
         User user = userService.userAdd(userAddRequest);
-        return TheResult.success(CodeBindMessage.SUCCESS, user);
+        return TheResult.success(CodeBindMessageEnum.SUCCESS, user);
     }
 
     /**
@@ -54,7 +54,7 @@ public class UserController { // 通常控制层有服务层中的所有方法, 
     @PostMapping("/delete")
     public BaseResponse<Boolean> userDelete(@RequestBody UserDeleteRequest userDeleteRequest) {
         Boolean result = userService.userDelete(userDeleteRequest);
-        return TheResult.success(CodeBindMessage.SUCCESS, result);
+        return TheResult.success(CodeBindMessageEnum.SUCCESS, result);
     }
 
     /**
@@ -65,7 +65,7 @@ public class UserController { // 通常控制层有服务层中的所有方法, 
     @PostMapping("/update")
     public BaseResponse<User> userUpdate(@RequestBody UserUpdateRequest userUpdateRequest) {
         User user = userService.userUpdate(userUpdateRequest);
-        return TheResult.success(CodeBindMessage.SUCCESS, user);
+        return TheResult.success(CodeBindMessageEnum.SUCCESS, user);
     }
 
     /**
@@ -76,7 +76,7 @@ public class UserController { // 通常控制层有服务层中的所有方法, 
     @PostMapping("/search")
     public BaseResponse<List<User>> userSearch(@RequestBody UserSearchRequest userSearchRequest) {
         List<User> userList = userService.userSearch(userSearchRequest);
-        return TheResult.success(CodeBindMessage.SUCCESS, userList);
+        return TheResult.success(CodeBindMessageEnum.SUCCESS, userList);
     }
 
     /**
@@ -87,7 +87,7 @@ public class UserController { // 通常控制层有服务层中的所有方法, 
     @PostMapping("/disable")
     public BaseResponse<Boolean> userDisable(@RequestBody UserDisableRequest userDisableRequest) {
         Boolean result = userService.userDisable(userDisableRequest.getId(), userDisableRequest.getDisableTime());
-        return TheResult.success(CodeBindMessage.SUCCESS, result);
+        return TheResult.success(CodeBindMessageEnum.SUCCESS, result);
     }
 
     /**
@@ -97,7 +97,7 @@ public class UserController { // 通常控制层有服务层中的所有方法, 
     @PostMapping("/register")
     public BaseResponse<Boolean> userRegister(@RequestBody UserRegisterRequest userRegisterRequest) {
         Boolean result = userService.userRegister(userRegisterRequest.getAccount(), userRegisterRequest.getPasswd(), userRegisterRequest.getCheckPasswd());
-        return TheResult.success(CodeBindMessage.SUCCESS, result);
+        return TheResult.success(CodeBindMessageEnum.SUCCESS, result);
     }
 
     /**
@@ -108,7 +108,7 @@ public class UserController { // 通常控制层有服务层中的所有方法, 
     public BaseResponse<UserVO> userLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request) {
         User user = userService.userLogin(userLoginRequest.getAccount(), userLoginRequest.getPasswd(), DeviceUtil.getRequestDevice(request)); // 这里同时解析用户的设备, 以支持同端互斥
         UserVO userVo = UserVO.removeSensitiveData(user);
-        return TheResult.success(CodeBindMessage.SUCCESS, userVo);
+        return TheResult.success(CodeBindMessageEnum.SUCCESS, userVo);
     }
 
     /**
@@ -118,7 +118,7 @@ public class UserController { // 通常控制层有服务层中的所有方法, 
     @PostMapping("/logout")
     public BaseResponse<Boolean> userLogout(HttpServletRequest request) {
         Boolean result = userService.userLogout(DeviceUtil.getRequestDevice(request));
-        return TheResult.success(CodeBindMessage.SUCCESS, result);
+        return TheResult.success(CodeBindMessageEnum.SUCCESS, result);
     }
 
     /**
@@ -128,7 +128,7 @@ public class UserController { // 通常控制层有服务层中的所有方法, 
     @GetMapping("/status")
     public BaseResponse<UserDto> userStatus() {
         UserDto userDto = userService.userStatus();
-        return TheResult.success(CodeBindMessage.SUCCESS, userDto);
+        return TheResult.success(CodeBindMessageEnum.SUCCESS, userDto);
     }
 
 }

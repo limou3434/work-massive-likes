@@ -4,7 +4,7 @@
  * 3. [服务层]编写 serveice 接口声明和 serviceImpl 接口实现
  * (1) 尽可能不要使用 Request 作为参数但增删改查服务除外
  * (2) 编写简单的 CUDA 代码
- * a. 内部业务出错抛出异常 BusinessException(CodeBindMessage.xxxxx, "更加详细的错误说明"), 就可以让控制层响应异常给前端并且避免直接处理报文, 如果发现 CodeBindMessage 枚举不够使用可以自己定义
+ * a. 内部业务出错抛出异常 BusinessException(CodeBindMessageEnum.xxxxx, "更加详细的错误说明"), 就可以让控制层响应异常给前端并且避免直接处理报文, 如果发现 CodeBindMessageEnum 枚举不够使用可以自己定义
  * b. 外部组件出错抛出异常可以在全局异常拦截器 GlobalExceptionHandler 中捕获处理, 以达到自动让控制层响应异常给前端, 并且组件抛异常可以和本业务服务进行隔离
  * (3) 需要做 "复杂校验、业务处理、数据返回"
  * 4. [控制层]每个 controller 都需要有直接对应的 serviceImpl

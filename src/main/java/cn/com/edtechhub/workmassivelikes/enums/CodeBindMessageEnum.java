@@ -9,7 +9,7 @@ import lombok.Getter;
  * @author <a href="https://github.com/limou3434">limou3434</a>
  */
 @Getter // 等价于只能用在类上的 Data
-public enum CodeBindMessage {
+public enum CodeBindMessageEnum {
 
     /**
      * 枚举常量
@@ -56,7 +56,7 @@ public enum CodeBindMessage {
      * @param code 状态
      * @param message 含义
      */
-    CodeBindMessage(int code, String message) {
+    CodeBindMessageEnum(int code, String message) {
         this.code = code;
         this.message = message;
     }

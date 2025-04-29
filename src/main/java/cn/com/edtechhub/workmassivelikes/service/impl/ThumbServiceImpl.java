@@ -3,10 +3,11 @@ package cn.com.edtechhub.workmassivelikes.service.impl;
 import cn.com.edtechhub.workmassivelikes.cache.AddResult;
 import cn.com.edtechhub.workmassivelikes.cache.HeavyKeeper;
 import cn.com.edtechhub.workmassivelikes.contant.LuaScriptConstant;
-import cn.com.edtechhub.workmassivelikes.enums.CodeBindMessage;
+import cn.com.edtechhub.workmassivelikes.enums.CodeBindMessageEnum;
 import cn.com.edtechhub.workmassivelikes.enums.LuaStatusEnum;
 import cn.com.edtechhub.workmassivelikes.exception.BusinessException;
 import cn.com.edtechhub.workmassivelikes.mapper.ThumbMapper;
+import cn.com.edtechhub.workmassivelikes.model.dto.ThumbEventDto;
 import cn.com.edtechhub.workmassivelikes.model.entity.Blog;
 import cn.com.edtechhub.workmassivelikes.model.entity.Thumb;
 import cn.com.edtechhub.workmassivelikes.service.BlogService;
@@ -20,10 +21,13 @@ import com.github.benmanes.caffeine.cache.Cache;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.pulsar.core.PulsarTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.List;
 
 /*
 点赞逻辑是整个项目的优化重点:
@@ -90,7 +94,7 @@ import java.util.Arrays;
    (10)在点赞发生意外时, 处理这种异常情况...
 
 4. [增加补偿机制]
-   一些极限情况下, 比如 "在即将同步临时记录到数据库里时, Redis 宕机了", 系统异常将导致数据不一致问题, 因为我们上面的设计是根据时间片来备份到 MySQL 中的, 可能会出现备份时部分旧的分片没有被备份, 我们还需要实现一个补偿任务, 在 job 包下创建 SyncThumb2DBCompensatory
+   一些极限情况下, 系统异常将导致数据不一致问题, 因为我们上面的设计是根据时间片来备份到 MySQL 中的, 可能会出现备份时部分旧的分片没有被备份, 我们还需要实现一个补偿任务, 在 job 包下创建 SyncThumb2DBCompensatory
 
 5. [多级缓存优化]
    在访问速度问题上, 我们还可以使用多级缓存问题来进一步提高访问速度
@@ -120,16 +124,35 @@ import java.util.Arrays;
    需要使用 TopK 算法得到的热点数据 userId 列表, 然后 Caffeine 中就需要存储根据 userId 以及对应的点赞记录列表, 这样在用户 blogId 点赞操作之前, 就可以直接从 Caffeine 中获取是否已经点赞, 而不需要再去 Redis 中判断
    例如对于 Redis 中的 thumb:01 -> "002:1", "003:1", 我们可以在 Caffeine 中存储 "01:[002, 003]",
    这样在用户确认点赞 002 之前, 就可以直接从 Caffeine 中获取是否已经确认点赞, 而不需要再去 Redis 中判断
-   这样在用户取消点赞 003 之前, 就可以直接从 Caffeine 中获取是否已经取消点赞, 而不需要再去 Redis 中判断
+   这样在用户取消点赞 003 之前, 就可以直接从 Caffeine 中获取是否已经取消点赞, 而不需要再去 Redis 中判断(可选)
 
    其他的情况下如果需要实现 L1 缓存再说, 先把这个最重要的实现了...
 
-7. [修复非法点赞]
+7. [消息队列异步]
+   不过在系统中还是存在一些问题:
+   - 点赞操作与后续的数据处理强耦合(如博文点赞计数更新), 不利于其他服务功能扩展
+   - Redis 和数据库之间的数据同步依赖定时任务, 缺乏实时性和可靠性保障, MySQL 挂掉后无所作为
+   因此我们需要引入消息队列, 这里选择使用 Pulsar 作为消息队列
+
+   (1)用户发起点赞请求后, 事件类型为 INCR, 服务端首先在 Redis/Caffeine 中验证用户是否已点赞
+   (2)对于未点赞的用户, 立即更新 Redis 中的点赞状态, 但是这次我们不再自己制作临时键值对, 我们为什么引入这个临时的机制? 不就是为了在某个时间片下进行备份么, 引入 MQ 可以快速帮助我们解决这个问题
+   (3)生产者构造点赞事件异步发送到 Pulsar 消息队列, 然后立即返回成功响应给用户
+   (4)消费者则异步处理队列中的点赞事件, 将数据持久化到数据库, 并更新博客的点赞计数
+
+   取消点赞的流程类似, 区别在于事件类型变为 DECR, 实际上引入了 MQ 后让系统变得更加简单了
+
+   不过有些时候会有一些异常网络波动, 会导致消息消费失败, 这个时候就需要做重试操作, 只需要配置网络协议栈中的重发机制 ACK 和 NACK 即可, 这个很简单, 只需要配置一个 Bean 后配置到 @PulsarListener 即可
+   如果出现无论如何重试都无法解决的消息, 则需要将消息存入到死信队列, 然后通过通知相关人员的方式来处理异常情况, 确保消息能够被成功消费掉, 也比较简单, 只需要配置一个 Bean 后配置到 @PulsarListener 即可
+   不过不知道为什么无法使用上述三个设置, 这点可能需要仔细查阅文档(会导致 consumerCustomizer 失效)
+
+8. []
+
+9. [修复非法点赞]
    由于我们跳过了一层数据库的校验, 把点赞的逻辑直接迁移到了 Redis 中, 然后开启定期的备份, 但此时无法校验接口中的 blogId 是否存在, 这会导致用户理论上来说可以对不存在的文章进行点赞
    查一次数据库校验在目前阶段肯定是不太合理了, 读一次库的时间都会超过我们写 Redis 的时间, 影响到系统的并发
    可以通过额外存储在 Redis 中的 String 结构来判断博客是否存在, 并且在 Lua 脚本里加一次判断即可
 
-8. [优化过期时间]
+10. [优化过期时间]
    但是这么做还是有些隐患, 我们没有设置过期时间, 并且 Redis 不支持对 hash 字段进行内部字段的过期时间
    只需要在 hash 的 blog_id 字段值修改为 "{"thumbId": "xxx", "expireTime": xxxxxxxxx}" 的 json 即可, 然后使用异步判断缓存是否过期, 大致流程如下:
    (1)用户初次点赞, 会在 Redis 中添加记录, 同时设置时间戳
@@ -185,6 +208,12 @@ public class ThumbServiceImpl extends ServiceImpl<ThumbMapper, Thumb> implements
     @Resource
     Cache<String, Object> localCache;
 
+    /**
+     * 注入 Pulsar 客户端
+     */
+    @Resource
+    private PulsarTemplate<ThumbEventDto> pulsarTemplate;
+
     @Override
     public Boolean thumbAddDoUseMySQL(Long blogId) {
         String userId = userService.userStatus().getUserId();
@@ -202,7 +231,7 @@ public class ThumbServiceImpl extends ServiceImpl<ThumbMapper, Thumb> implements
 
                         if (exists) {
                             // 有可能缓存中没有记录, 还需要进一步查询 MySQL, 但是单纯这么想就会违背我们引入缓存的目的(高效)
-                            throw new BusinessException(CodeBindMessage.CONFLICT_ERROR, "用户已确认点赞");
+                            throw new BusinessException(CodeBindMessageEnum.CONFLICT_ERROR, "用户已确认点赞");
                         }
 
                         // 更新博客表中对应文章的点赞次数
@@ -238,7 +267,7 @@ public class ThumbServiceImpl extends ServiceImpl<ThumbMapper, Thumb> implements
                                 .one();
 
                         if (thumb == null) {
-                            throw new BusinessException(CodeBindMessage.CONFLICT_ERROR, "用户已取消点赞");
+                            throw new BusinessException(CodeBindMessageEnum.CONFLICT_ERROR, "用户已取消点赞");
                         }
 
                         Long thumbId = thumb.getId();
@@ -270,7 +299,7 @@ public class ThumbServiceImpl extends ServiceImpl<ThumbMapper, Thumb> implements
         );
 
         if (LuaStatusEnum.FAIL.getValue() == result) {
-            throw new BusinessException(CodeBindMessage.CONFLICT_ERROR, "用户已确认点赞");
+            throw new BusinessException(CodeBindMessageEnum.CONFLICT_ERROR, "用户已确认点赞");
         }
 
         return LuaStatusEnum.SUCCESS.getValue() == result;
@@ -291,7 +320,7 @@ public class ThumbServiceImpl extends ServiceImpl<ThumbMapper, Thumb> implements
         );
 
         if (result == LuaStatusEnum.FAIL.getValue()) {
-            throw new BusinessException(CodeBindMessage.CONFLICT_ERROR, "用户已取消点赞");
+            throw new BusinessException(CodeBindMessageEnum.CONFLICT_ERROR, "用户已取消点赞");
         }
 
         return LuaStatusEnum.SUCCESS.getValue() == result;
@@ -316,7 +345,7 @@ public class ThumbServiceImpl extends ServiceImpl<ThumbMapper, Thumb> implements
             // 如果 Caffeine 中已经存在了, 则表示用户已经点赞过了
             if (localCache.getIfPresent(userId) != null) {
                 log.debug("用户 {} 反复点赞情况较多, 可以警告或封禁", userId);
-                throw new BusinessException(CodeBindMessage.CONFLICT_ERROR, "用户已确认点赞");
+                throw new BusinessException(CodeBindMessageEnum.CONFLICT_ERROR, "用户已确认点赞");
             }
             // 如果 Caffeine 中不存在, 则表示用户没有点赞过, 需要把当前元素的 key 存储到 Caffeine 中
             else {
@@ -325,8 +354,7 @@ public class ThumbServiceImpl extends ServiceImpl<ThumbMapper, Thumb> implements
         }
 
         // 如果当前元素不是热点, 则直接进行点赞操作即可
-        this.thumbAddDoUseRedis(blogId);
-        return true;
+        return this.thumbAddDoUseRedis(blogId);
     }
 
     @Override
@@ -340,7 +368,76 @@ public class ThumbServiceImpl extends ServiceImpl<ThumbMapper, Thumb> implements
         }
 
         // 进行取消点赞的实际操作
-        this.thumbAddUnDoUseRedis(blogId);
+        return this.thumbAddUnDoUseRedis(blogId);
+    }
+
+    public Boolean thumbAddDoUseMQ(Long blogId) {
+        String userId = userService.userStatus().getUserId();
+        String userThumbKey = RedisKeyUtil.getUserThumbKey(userId);
+
+        // 执行 Lua 脚本
+        long result = redisTemplate.execute(
+                LuaScriptConstant.THUMB_SCRIPT_MQ,
+                List.of(userThumbKey),
+                blogId
+        );
+
+        if (LuaStatusEnum.FAIL.getValue() == result) {
+            throw new BusinessException(CodeBindMessageEnum.CONFLICT_ERROR, "用户已确认点赞");
+        }
+
+        // 构造确认点赞事件
+        ThumbEventDto thumbEvent = ThumbEventDto.builder()
+                .blogId(blogId)
+                .userId(Long.valueOf(userId))
+                .type(ThumbEventDto.EventType.INCR)
+                .eventTime(LocalDateTime.now())
+                .build();
+
+        // 异步发送确认点赞事件到 Pulsar 消息队列
+        pulsarTemplate
+                .sendAsync("thumb-topic", thumbEvent) // 发送到 Pulsar 消息队列中的 thumb-topic 主题中
+                .exceptionally(ex -> { // 出现异常时的处理
+                    redisTemplate.opsForHash().delete(userThumbKey, blogId.toString(), true);
+                    log.debug("确认点赞事件发送失败: userId={}, blogId={}", userId, blogId);
+                    return null;
+                });
+
+        return true;
+    }
+
+    public Boolean thumbAddUnDoUseMQ(Long blogId) {
+        String userId = userService.userStatus().getUserId();
+        String userThumbKey = RedisKeyUtil.getUserThumbKey(userId);
+
+        // 执行 Lua 脚本
+        long result = redisTemplate.execute(
+                LuaScriptConstant.UNTHUMB_SCRIPT_MQ,
+                List.of(userThumbKey),
+                blogId
+        );
+
+        if (LuaStatusEnum.FAIL.getValue() == result) {
+            throw new BusinessException(CodeBindMessageEnum.CONFLICT_ERROR, "用户已取消点赞");
+        }
+
+        // 构造取消点赞事件
+        ThumbEventDto thumbEventDto = ThumbEventDto.builder()
+                .blogId(blogId)
+                .userId(Long.valueOf(userId))
+                .type(ThumbEventDto.EventType.DECR)
+                .eventTime(LocalDateTime.now())
+                .build();
+
+        // 异步发送取消点赞事件到 Pulsar 消息队列
+        pulsarTemplate
+                .sendAsync("thumb-topic", thumbEventDto)
+                .exceptionally(ex -> {
+                    redisTemplate.opsForHash().put(userThumbKey, blogId.toString(), true);
+                    log.debug("取消点赞事件发送失败: userId={}, blogId={}", userId, blogId);
+                    return null;
+                });
+
         return true;
     }
 

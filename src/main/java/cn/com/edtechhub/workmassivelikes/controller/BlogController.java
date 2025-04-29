@@ -1,19 +1,16 @@
 package cn.com.edtechhub.workmassivelikes.controller;
 
-import cn.com.edtechhub.workmassivelikes.enums.CodeBindMessage;
+import cn.com.edtechhub.workmassivelikes.enums.CodeBindMessageEnum;
 import cn.com.edtechhub.workmassivelikes.model.dto.BlogDto;
 import cn.com.edtechhub.workmassivelikes.model.entity.Blog;
 import cn.com.edtechhub.workmassivelikes.request.BlogSearchRequest;
 import cn.com.edtechhub.workmassivelikes.response.BaseResponse;
 import cn.com.edtechhub.workmassivelikes.response.TheResult;
 import cn.com.edtechhub.workmassivelikes.service.BlogService;
-import cn.com.edtechhub.workmassivelikes.service.ThumbService;
-import cn.com.edtechhub.workmassivelikes.service.UserService;
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaCheckRole;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,7 +34,7 @@ public class BlogController {
     @PostMapping("/search")
     public BaseResponse<List<Blog>> blogSearch(@RequestBody BlogSearchRequest blogSearchRequest) {
         List<Blog> blogList = blogService.blogSearch(blogSearchRequest);
-        return TheResult.success(CodeBindMessage.SUCCESS, blogList);
+        return TheResult.success(CodeBindMessageEnum.SUCCESS, blogList);
     }
 
     /**
@@ -47,7 +44,7 @@ public class BlogController {
     @PostMapping("/search/include_has_thumb")
     public BaseResponse<List<BlogDto>> blogSearchIncludeHasThumb(@RequestBody BlogSearchRequest blogSearchRequest) {
         List<BlogDto> blogDtoList = blogService.blogSearchIncludeHasThumb(blogSearchRequest);
-        return TheResult.success(CodeBindMessage.SUCCESS, blogDtoList);
+        return TheResult.success(CodeBindMessageEnum.SUCCESS, blogDtoList);
     }
 
     /**
@@ -57,7 +54,7 @@ public class BlogController {
     @PostMapping("/search/include_has_thumb/by/id")
     public BaseResponse<List<BlogDto>> blogSearchIncludeHasThumbById(Long blogId) {
         List<BlogDto> blogDtoList = blogService.blogSearchIncludeHasThumbById(blogId);
-        return TheResult.success(CodeBindMessage.SUCCESS, blogDtoList);
+        return TheResult.success(CodeBindMessageEnum.SUCCESS, blogDtoList);
     }
 
 }

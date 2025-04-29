@@ -1,6 +1,6 @@
 package cn.com.edtechhub.workmassivelikes.controller;
 
-import cn.com.edtechhub.workmassivelikes.enums.CodeBindMessage;
+import cn.com.edtechhub.workmassivelikes.enums.CodeBindMessageEnum;
 import cn.com.edtechhub.workmassivelikes.response.BaseResponse;
 import cn.com.edtechhub.workmassivelikes.response.TheResult;
 import cn.com.edtechhub.workmassivelikes.service.ThumbService;
@@ -22,13 +22,13 @@ public class ThumbController {
     @SaCheckLogin
     @PostMapping("/add/do")
     public BaseResponse<Boolean> thumbAddDo(Long blogId) {
-        return TheResult.success(CodeBindMessage.SUCCESS, thumbService.thumbAddDoUseCaffeine(blogId));
+        return TheResult.success(CodeBindMessageEnum.SUCCESS, thumbService.thumbAddDoUseMQ(blogId));
     }
 
     @SaCheckLogin
     @PostMapping("/add/undo")
     public BaseResponse<Boolean> thumbAddUnDo(Long blogId) {
-        return TheResult.success(CodeBindMessage.SUCCESS, thumbService.thumbAddUnDoUseCaffeine(blogId));
+        return TheResult.success(CodeBindMessageEnum.SUCCESS, thumbService.thumbAddUnDoUseMQ(blogId));
     }
 
 }

@@ -1,6 +1,6 @@
 package cn.com.edtechhub.workmassivelikes.response;
 
-import cn.com.edtechhub.workmassivelikes.enums.CodeBindMessage;
+import cn.com.edtechhub.workmassivelikes.enums.CodeBindMessageEnum;
 
 /**
  * 便捷响应体工具类
@@ -18,18 +18,18 @@ public class TheResult {
      * @param <T> data 的类型
      * @return 通用响应体对象
      */
-    public static <T> BaseResponse<T> success(CodeBindMessage codeBindMessage, T data) {
-        return new BaseResponse<>(codeBindMessage, data);
+    public static <T> BaseResponse<T> success(CodeBindMessageEnum codeBindMessageEnum, T data) {
+        return new BaseResponse<>(codeBindMessageEnum, data);
     }
 
     /**
      * 构造失败响应体
      *
-     * @param codeBindMessage 错误-含义 枚举体
+     * @param codeBindMessageEnum 错误-含义 枚举体
      * @return 通用响应体对象
      */
-    public static <T> BaseResponse<T> error(CodeBindMessage codeBindMessage, String message) {
-        return new BaseResponse<>(codeBindMessage, message);
+    public static <T> BaseResponse<T> error(CodeBindMessageEnum codeBindMessageEnum, String message) {
+        return new BaseResponse<>(codeBindMessageEnum, message);
     }
 
 }

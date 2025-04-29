@@ -40,4 +40,14 @@ public interface ThumbService extends IService<Thumb> {
      */
     Boolean thumbAddUnDoUseCaffeine(Long blogId);
 
+    /**
+     * 确认点赞(基于 MQ)
+     */
+    Boolean thumbAddDoUseMQ(Long blogId);
+
+    /**
+     * 取消点赞(基于 MQ)
+     */
+    Boolean thumbAddUnDoUseMQ(Long blogId);
+
 }
