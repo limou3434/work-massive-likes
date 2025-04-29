@@ -22,13 +22,13 @@ public class ThumbController {
     @SaCheckLogin
     @PostMapping("/add/do")
     public BaseResponse<Boolean> thumbAddDo(Long blogId) {
-        return TheResult.success(CodeBindMessage.SUCCESS, thumbService.thumbAddDoUseRedis(blogId));
+        return TheResult.success(CodeBindMessage.SUCCESS, thumbService.thumbAddDoUseCaffeine(blogId));
     }
 
     @SaCheckLogin
     @PostMapping("/add/undo")
     public BaseResponse<Boolean> thumbAddUnDo(Long blogId) {
-        return TheResult.success(CodeBindMessage.SUCCESS, thumbService.thumbAddUnDoUseRedis(blogId));
+        return TheResult.success(CodeBindMessage.SUCCESS, thumbService.thumbAddUnDoUseCaffeine(blogId));
     }
 
 }

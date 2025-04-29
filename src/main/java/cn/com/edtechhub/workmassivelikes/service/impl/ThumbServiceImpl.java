@@ -1,5 +1,7 @@
 package cn.com.edtechhub.workmassivelikes.service.impl;
 
+import cn.com.edtechhub.workmassivelikes.cache.AddResult;
+import cn.com.edtechhub.workmassivelikes.cache.HeavyKeeper;
 import cn.com.edtechhub.workmassivelikes.contant.LuaScriptConstant;
 import cn.com.edtechhub.workmassivelikes.enums.CodeBindMessage;
 import cn.com.edtechhub.workmassivelikes.enums.LuaStatusEnum;
@@ -14,7 +16,9 @@ import cn.com.edtechhub.workmassivelikes.utils.RedisKeyUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.benmanes.caffeine.cache.Cache;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -93,18 +97,32 @@ import java.util.Arrays;
    (1)一级缓存 Caffeine, 这里保存访问最高频的数据, 响应速度最快(Caffeine 将数据直接存储在 JVM 堆内存, 并且由于是基于本地的缓存机制, 很少网络开销)
    (2)二级缓存 Redis, 这里保存访问次数较多的数据, 响应速度较快(Redis 是基于内存的缓存机制, 但是由于 Redis 是基于网络的, 因此网络开销比较大)
    (3)三级缓存 MySQL, 最终存储层, 保证数据的持久化和完整性
+   引入 Caffeine 比较简单, 但是我们需要明白我们拿 Caffeine 来缓存什么数据, 这里把非常热点的键值对使用 Caffeine 进行本地存储
+   我把这里引入的 Caffeine 留到后面的超级热点中进行使用
 
 6. [超级热点优化]
    我们通过引入 Redis 解决了点赞系统的数据库读写压力问题, 虽然 Redis 性能优于 MySQL, 但在高并发场景下, Redis 也可能成为系统瓶颈:
-   (1)单点热点问题: 某些热门内容(如爆款博客)会被大量用户同时点赞, Redis 服务器压力激增
-   (2)恶意用户刷量: 某些恶意用户用脚本超高频率刷点赞接口, 导致对应的 hash 中的某个 key 成为超级热点, 影响正常用户的请求响应
-   这些问题在流量高峰期尤为明显, 可能导致系统响应变慢, 甚至服务不可用, 我们需要进一步优化用户是否已点赞的逻辑, 减轻 Redis 的压力
-   因此我们可以一步一步来自己实现 HeavyKeeper 算法后, 再引入现有的框架 hotkey
+   - 单点热点问题: 某些热门内容(如爆款博客)会被大量用户同时点赞, Redis 服务器压力激增
+   - 恶意用户刷量: 某些恶意用户用脚本超高频率刷点赞接口, 导致对应的 hash 中的某个 key 成为超级热点, 影响正常用户的请求响应
+   这些问题在流量高峰期尤为明显, 可能导致系统响应变慢, 甚至服务不可用, 我们需要进一步优化 "用户是否已点赞" 的判断逻辑, 减轻 Redis 的压力
 
-   HeavyKeeper 是一种高效的流式 TopK 检测算法, 专为识别大规模数据流中的频繁项(热点 Key)而生, 它基于 Count-Min Sketch 算法改进, 主要通过以下组件实现:
+   这里选择自己实现 TopK 算法, HeavyKeeper 是一种高效的流式 TopK 检测算法, 专为识别大规模数据流中的频繁项(热点 Key)而生, 它基于 Count-Min Sketch 算法改进, 主要通过以下组件实现:
    (1)二维数组: 算法维护一个 d*w 二维数组, 里面有 d 层, 每层里有 w 个桶, 桶里记录哈希指纹和计数值
-   (2)衰减机制: 核心创新点, 当发生哈希冲突时, 不是简单的覆盖, 而是通过概率衰减原有计数
-   (3)小堆结构: 维护一个大小为 k 的最小堆, 用于记录当前观测到的 TopK 项
+   (2)小堆结构: 维护一个大小为 k 的最小堆, 用于记录当前观测到的 TopK 项
+   (3)队列结构: 维护一个队列, 用于存储被挤出最小堆的元素
+   (4)映射机制: 通过哈希函数将数据映射到二维数组中, 每个数据都会映射到一个桶中, 桶中记录哈希指纹和计数值
+   (5)衰减机制: 核心创新点, 当发生哈希冲突时, 不是简单的覆盖, 而是通过概率衰减原有计数
+
+   整理一下, 我们需要优化的主要是 "用户是否已点赞" 的判断逻辑, 因此在下面这些地方都需要进行优化
+   - 用户确认点赞之前
+   - 用户取消点赞之前
+
+   需要使用 TopK 算法得到的热点数据 userId 列表, 然后 Caffeine 中就需要存储根据 userId 以及对应的点赞记录列表, 这样在用户 blogId 点赞操作之前, 就可以直接从 Caffeine 中获取是否已经点赞, 而不需要再去 Redis 中判断
+   例如对于 Redis 中的 thumb:01 -> "002:1", "003:1", 我们可以在 Caffeine 中存储 "01:[002, 003]",
+   这样在用户确认点赞 002 之前, 就可以直接从 Caffeine 中获取是否已经确认点赞, 而不需要再去 Redis 中判断
+   这样在用户取消点赞 003 之前, 就可以直接从 Caffeine 中获取是否已经取消点赞, 而不需要再去 Redis 中判断
+
+   其他的情况下如果需要实现 L1 缓存再说, 先把这个最重要的实现了...
 
 7. [修复非法点赞]
    由于我们跳过了一层数据库的校验, 把点赞的逻辑直接迁移到了 Redis 中, 然后开启定期的备份, 但此时无法校验接口中的 blogId 是否存在, 这会导致用户理论上来说可以对不存在的文章进行点赞
@@ -120,7 +138,6 @@ import java.util.Arrays;
    (4)用户再次点赞, 会在 Redis 中添加记录, 同时设置时间戳
    (5)用户久未登录, 异步虚拟线程工作时, 用 MySQL 备份备份键值对, 用 Redis 删除过期键值对
    (6)用户突然登陆, 由于 Redis 中没有对应的数据, 所以需要查询数据库, 但是还需要把数据库中关于该用户的点赞记录重新推送到 Redis 中, 这样后续读取就不会一直访问两个数据库
-
 */
 
 /**
@@ -129,11 +146,18 @@ import java.util.Arrays;
  * @createDate 2025-04-23 12:30:45
  */
 @Service
+@Slf4j
 public class ThumbServiceImpl extends ServiceImpl<ThumbMapper, Thumb> implements ThumbService {
 
+    /**
+     * 注入用户服务依赖
+     */
     @Resource
     UserService userService;
 
+    /**
+     * 注入博文服务依赖
+     */
     @Resource
     BlogService blogService;
 
@@ -148,6 +172,18 @@ public class ThumbServiceImpl extends ServiceImpl<ThumbMapper, Thumb> implements
      */
     @Resource
     RedisTemplate<String, Object> redisTemplate;
+
+    /**
+     * 初始化 TopK 数据结构
+     */
+    @Resource
+    HeavyKeeper hotKeyDetector;
+
+    /**
+     * 初始化 Caffeine 本地缓存
+     */
+    @Resource
+    Cache<String, Object> localCache;
 
     @Override
     public Boolean thumbAddDoUseMySQL(Long blogId) {
@@ -222,8 +258,8 @@ public class ThumbServiceImpl extends ServiceImpl<ThumbMapper, Thumb> implements
     @Override
     public Boolean thumbAddDoUseRedis(Long blogId) {
         String userId = userService.userStatus().getUserId();
-        String tempThumbKey = RedisKeyUtil.getTempThumbKey(getTimeSlice());
-        String userThumbKey = RedisKeyUtil.getUserThumbKey(userId);
+        String tempThumbKey = RedisKeyUtil.getTempThumbKey(getTimeSlice()); // key(time_slice) -> "field(user_id:blog_id)=value(is_thumb)", ...
+        String userThumbKey = RedisKeyUtil.getUserThumbKey(userId); // key(user_id) -> "field(blog_id)=value(thumb_id)", ...
 
         // 执行 Lua 脚本
         long result = redisTemplate.execute(
@@ -259,6 +295,53 @@ public class ThumbServiceImpl extends ServiceImpl<ThumbMapper, Thumb> implements
         }
 
         return LuaStatusEnum.SUCCESS.getValue() == result;
+    }
+
+    @Override
+    public Boolean thumbAddDoUseCaffeine(Long blogId) {
+        String userId = userService.userStatus().getUserId();
+        String userThumbKey = RedisKeyUtil.getUserThumbKey(userId); // key(user_id) -> "field(blog_id)=value(thumb_id)", ...
+
+        // 添加/更新新的元素
+        AddResult addResult = hotKeyDetector.add(userId, 1);
+
+        log.debug("当前操作 {}", addResult.getCurrentKey());
+        log.debug("被挤出的 {}", addResult.getExpelledKey());
+        log.debug("是否热点 {}", addResult.isHotKey());
+        log.debug("TopK list {}", hotKeyDetector.list());
+        log.debug("TopK expelled {}", hotKeyDetector.expelled());
+
+        // 如果当前元素是热点, 则需要把当前元素的 key 存储到 Caffeine 中
+        if (addResult.isHotKey()) {
+            // 如果 Caffeine 中已经存在了, 则表示用户已经点赞过了
+            if (localCache.getIfPresent(userId) != null) {
+                log.debug("用户 {} 反复点赞情况较多, 可以警告或封禁", userId);
+                throw new BusinessException(CodeBindMessage.CONFLICT_ERROR, "用户已确认点赞");
+            }
+            // 如果 Caffeine 中不存在, 则表示用户没有点赞过, 需要把当前元素的 key 存储到 Caffeine 中
+            else {
+                localCache.put(userId, userThumbKey);
+            }
+        }
+
+        // 如果当前元素不是热点, 则直接进行点赞操作即可
+        this.thumbAddDoUseRedis(blogId);
+        return true;
+    }
+
+    @Override
+    public Boolean thumbAddUnDoUseCaffeine(Long blogId) {
+        String userId = userService.userStatus().getUserId();
+
+        // 如果用户在 Caffeine 中存在，则移除
+        if (localCache.getIfPresent(userId) != null) {
+            localCache.invalidate(userId);
+            log.debug("用户 {} 取消点赞, 移除 Caffeine 缓存", userId);
+        }
+
+        // 进行取消点赞的实际操作
+        this.thumbAddUnDoUseRedis(blogId);
+        return true;
     }
 
     /**

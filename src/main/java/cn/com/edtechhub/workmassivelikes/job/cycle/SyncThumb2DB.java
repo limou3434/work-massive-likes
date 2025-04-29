@@ -24,8 +24,8 @@ import java.util.Map;
 /**
  * 定时将 Redis 中的临时点赞记录同步到 MySQL 中
  */
-@Slf4j
 @Component
+@Slf4j
 public class SyncThumb2DB {
 
     /**
@@ -72,7 +72,7 @@ public class SyncThumb2DB {
     }
 
     /**
-     * 同步 Redis 中的点赞记录到数据库
+     * 同步 Redis 中的点赞记录到数据库, data 为外部传递进来的临时点赞键名, 格式为 "HH:mm:ss"
      */
     public void syncThumb2DBByDate(String date) {
         // 获取到临时点赞记录

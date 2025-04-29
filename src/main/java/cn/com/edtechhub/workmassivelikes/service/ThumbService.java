@@ -2,9 +2,6 @@ package cn.com.edtechhub.workmassivelikes.service;
 
 import cn.com.edtechhub.workmassivelikes.model.entity.Thumb;
 import com.baomidou.mybatisplus.extension.service.IService;
-import org.apache.ibatis.annotations.Param;
-
-import java.util.Map;
 
 /**
  * @author Limou
@@ -32,5 +29,15 @@ public interface ThumbService extends IService<Thumb> {
      * 取消点赞(基于 Redis)
      */
     Boolean thumbAddUnDoUseRedis(Long blogId);
+
+    /**
+     * 确认点赞(基于 Caffeine)
+     */
+    Boolean thumbAddDoUseCaffeine(Long blogId);
+
+    /**
+     * 取消点赞(基于 Caffeine)
+     */
+    Boolean thumbAddUnDoUseCaffeine(Long blogId);
 
 }

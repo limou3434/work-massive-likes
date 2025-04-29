@@ -1,7 +1,7 @@
 package cn.com.edtechhub.workmassivelikes.cache;
 
 /**
- * 最小堆节点
+ * 描述最小堆节点结构
  */
 public class Node {
 

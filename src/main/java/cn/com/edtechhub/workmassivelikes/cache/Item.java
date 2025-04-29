@@ -1,5 +1,8 @@
 package cn.com.edtechhub.workmassivelikes.cache;
 
+/**
+ * 描述 TopK 数据结构中的元素
+ */
 public record Item(String key, int count) {
 }
 /*
