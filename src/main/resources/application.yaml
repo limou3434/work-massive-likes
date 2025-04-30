@@ -40,6 +40,10 @@ spring:
           max-idle: 10
           # 连接池中的最小空闲连接
           min-idle: 0
+  ## 配置队列
+  pulsar:
+    client:
+      service-url: pulsar://127.0.0.1:6650
   ## 配置视图
   mvc:
     servlet:

@@ -24,6 +24,8 @@ public class PulsarConfig<T> implements PulsarListenerConsumerBuilderCustomizer<
                         .timeout(10000, TimeUnit.MILLISECONDS) // 设置超时时间(单位毫秒)
                         .build()
         );
+
+        consumerBuilder.subscriptionType(org.apache.pulsar.client.api.SubscriptionType.Shared); // 确保使用共享消费模式
     }
 
 }

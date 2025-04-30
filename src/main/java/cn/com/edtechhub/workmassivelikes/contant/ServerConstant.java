@@ -3,13 +3,14 @@ package cn.com.edtechhub.workmassivelikes.contant;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 /**
  * 应用项目常量
  *
  * @author <a href="https://github.com/limou3434">limou3434</a>
  */
-@Configuration
+@Component
 @Data
 public class ServerConstant {
 

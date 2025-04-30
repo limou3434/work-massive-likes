@@ -1,0 +1,13 @@
+# 配置框架(使用 java -jar app.jar --spring.profiles.active=develop | release | production 来启动项目, 其中 release 有时间就拿来测试, 而 production 存储在 Github 上, 每次修改 Github 配置就需要刷新(这个有时间可以优化为无需重启))
+spring:
+  datasource:
+    url: jdbc:mysql://work-tidb:4000/work_massive_likes # 3306 为 MySQL, 4000 为 TIDB
+  data:
+    redis:
+      database: 1
+      host: work-redis
+  pulsar:
+    client:
+      service-url: pulsar://work-pulsar:6650
+server:
+  address: 0.0.0.0
