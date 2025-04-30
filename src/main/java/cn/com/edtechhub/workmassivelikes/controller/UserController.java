@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 用户控制层
+ * 用户控制器
  *
  * @author <a href="https://github.com/limou3434">limou3434</a>
  */

@@ -5,6 +5,8 @@ import java.util.concurrent.BlockingQueue;
 
 /**
  * TopK 算法声明
+ *
+ * @author <a href="https://github.com/limou3434">limou3434</a>
  */
 public interface TopK {
 

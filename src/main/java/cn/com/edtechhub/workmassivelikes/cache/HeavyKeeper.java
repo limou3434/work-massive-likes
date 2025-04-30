@@ -1,18 +1,15 @@
 package cn.com.edtechhub.workmassivelikes.cache;
 
 import cn.hutool.core.util.HashUtil;
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 /**
  * TopK 算法实现(参考 https://github.com/go-kratos/aegis/tree/main/topk 实现)
+ *
+ * @author <a href="https://github.com/limou3434">limou3434</a>
  */
 public class HeavyKeeper implements TopK {
 

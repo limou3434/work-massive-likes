@@ -7,6 +7,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
  * Sa-token 配置
+ *
+ * @author <a href="https://github.com/limou3434">limou3434</a>
  */
 @Configuration
 public class SaTokenConfig implements WebMvcConfigurer {

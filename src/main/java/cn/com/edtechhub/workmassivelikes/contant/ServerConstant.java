@@ -1,4 +1,4 @@
-package cn.com.edtechhub.workmassivelikes.config;
+package cn.com.edtechhub.workmassivelikes.contant;
 
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @Data
-public class ServerConfig {
+public class ServerConstant {
 
     /**
      * 项目名称

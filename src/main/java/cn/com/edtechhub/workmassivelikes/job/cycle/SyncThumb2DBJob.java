@@ -23,10 +23,12 @@ import java.util.Map;
 
 /**
  * 定时将 Redis 中的临时点赞记录同步到 MySQL 中
+ *
+ * @author <a href="https://github.com/limou3434">limou3434</a>
  */
 @Component
 @Slf4j
-public class SyncThumb2DB {
+public class SyncThumb2DBJob {
 
     /**
      * 注入点赞服务依赖

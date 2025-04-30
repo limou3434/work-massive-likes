@@ -14,6 +14,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * 点赞控制器
+ *
+ * @author <a href="https://github.com/limou3434">limou3434</a>
+ */
 @RestController // 返回值默认为 json 类型
 @RequestMapping("/thumb")
 @Slf4j

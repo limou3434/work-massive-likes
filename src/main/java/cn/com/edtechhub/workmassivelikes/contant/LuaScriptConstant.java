@@ -3,6 +3,11 @@ package cn.com.edtechhub.workmassivelikes.contant;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
 
+/**
+ * Lua 脚本常量
+ *
+ * @author <a href="https://github.com/limou3434">limou3434</a>
+ */
 public class LuaScriptConstant {
 
     /**

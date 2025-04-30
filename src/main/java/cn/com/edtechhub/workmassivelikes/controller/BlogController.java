@@ -18,6 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * 博文控制器
+ *
+ * @author <a href="https://github.com/limou3434">limou3434</a>
+ */
 @RestController // 返回值默认为 json 类型
 @RequestMapping("/blog")
 @Slf4j

@@ -23,10 +23,12 @@ import java.util.stream.Collectors;
 
 /**
  * 定时将 MQ 中的消息同步到 MySQL 中的补偿措施
+ *
+ * @author <a href="https://github.com/limou3434">limou3434</a>
  */
 @Component
 @Slf4j
-public class ThumbReconcile {
+public class ThumbReconcileJob {
 
     /**
      * 注入 Redis 客户端

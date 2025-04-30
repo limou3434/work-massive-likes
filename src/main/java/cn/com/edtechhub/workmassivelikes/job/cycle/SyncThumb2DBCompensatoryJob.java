@@ -15,16 +15,18 @@ import java.util.Set;
 
 /**
  * 定时将 Redis 中的临时点赞记录同步到 MySQL 中的补偿措施
+ *
+ * @author <a href="https://github.com/limou3434">limou3434</a>
  */
 @Component
 @Slf4j
-public class SyncThumb2DBCompensatory {
+public class SyncThumb2DBCompensatoryJob {
 
     @Resource
     private RedisTemplate<String, Object> redisTemplate;
 
     @Resource
-    private SyncThumb2DB syncThumb2DBJob;
+    private SyncThumb2DBJob syncThumb2DBJob;
 
     @Scheduled(cron = "0 0 2 * * *") // 每天凌晨 2 点执行一次
     public void run() {

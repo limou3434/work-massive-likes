@@ -26,9 +26,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * @author Limou
- * @description 针对表【blog(博客表)】的数据库操作Service实现
- * @createDate 2025-04-23 12:30:45
+ * 博客服务实现
+ *
+ * @author <a href="https://github.com/limou3434">limou3434</a>
  */
 @Service
 public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements BlogService {

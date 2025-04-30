@@ -3,7 +3,7 @@ package cn.com.edtechhub.workmassivelikes.enums;
 import lombok.Getter;
 
 /**
- * 用户角色枚举
+ * 用户角色枚举体
  *
  * @author <a href="https://github.com/limou3434">limou3434</a>
  */

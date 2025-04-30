@@ -9,6 +9,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Pulsar 配置
+ *
+ * @author <a href="https://github.com/limou3434">limou3434</a>
  */
 @Configuration
 public class PulsarConfig<T> implements PulsarListenerConsumerBuilderCustomizer<T> {

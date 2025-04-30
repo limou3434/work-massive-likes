@@ -7,8 +7,9 @@ import java.util.Date;
 import lombok.Data;
 
 /**
- * 博客表
- * @TableName blog
+ * 博客实体
+ *
+ * @author <a href="https://github.com/limou3434">limou3434</a>
  */
 @TableName(value ="blog")
 @Data

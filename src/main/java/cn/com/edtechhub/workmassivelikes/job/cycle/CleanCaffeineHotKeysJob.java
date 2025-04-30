@@ -8,9 +8,14 @@ import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
 
+/**
+ * 定时衰弱 TopK 数据结构
+ *
+ * @author <a href="https://github.com/limou3434">limou3434</a>
+ */
 @Component
 @Slf4j
-public class CleanCaffeineHotKeys {
+public class CleanCaffeineHotKeysJob {
 
     @Resource
     private HeavyKeeper hotKeyDetector;

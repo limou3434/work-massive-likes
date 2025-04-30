@@ -3,7 +3,7 @@ package cn.com.edtechhub.workmassivelikes.model.dto;
 import lombok.Data;
 
 /**
- * 描述用户状态
+ * 描述用户状态 DTO
  *
  * @author <a href="https://github.com/limou3434">limou3434</a>
  */

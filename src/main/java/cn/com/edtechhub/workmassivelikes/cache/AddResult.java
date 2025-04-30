@@ -4,6 +4,8 @@ import lombok.Data;
 
 /**
  * 描述对 TopK 结构新增后的返回结果
+ *
+ * @author <a href="https://github.com/limou3434">limou3434</a>
  */
 @Data
 public class AddResult {

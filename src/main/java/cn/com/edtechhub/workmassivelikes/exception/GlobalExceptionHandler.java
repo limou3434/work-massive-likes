@@ -16,11 +16,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  * 全局异常处理方法类
  * 截获异常, 把异常的 "错误-含义:消息" 作为响应传递给前端, 本质时为了避免让服务层抛异常而不涉及报文相关的东西, 让全局异常处理器来代做
  * Java 异常体系
- * Object -> Throwable
- * -> 错误: Error
- * -> 异常: Exception
- * -> 运行时异常: RuntimeException(BusinessException, NotLoginException, NotPermissionException, NotRoleException, DisableServiceException)
- * -> 非运时异常: IOException
+ * Object -> Throwable -> 错误: Error && 异常: Exception
+ * 运行时异常: RuntimeException(BusinessException, NotLoginException, NotPermissionException, NotRoleException, DisableServiceException, ...)
+ * 非运时异常: IOException, ...
  *
  * @author <a href="https://github.com/limou3434">limou3434</a>
  */

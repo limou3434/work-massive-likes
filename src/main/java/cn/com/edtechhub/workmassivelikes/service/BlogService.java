@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
-* @author Limou
-* @description 针对表【blog(博客表)】的数据库操作Service
-* @createDate 2025-04-23 12:30:45
-*/
+ * 博客服务声明
+ *
+ * @author <a href="https://github.com/limou3434">limou3434</a>
+ */
 public interface BlogService extends IService<Blog> {
 
     /**

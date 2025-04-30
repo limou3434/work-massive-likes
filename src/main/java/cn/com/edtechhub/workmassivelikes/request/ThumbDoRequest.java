@@ -4,6 +4,11 @@ import lombok.Data;
 
 import java.io.Serializable;
 
+/**
+ * 确认点赞请求
+ *
+ * @author <a href="https://github.com/limou3434">li
+ */
 @Data
 public class ThumbDoRequest implements Serializable {
 

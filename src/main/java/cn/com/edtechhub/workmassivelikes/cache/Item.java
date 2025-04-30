@@ -2,6 +2,8 @@ package cn.com.edtechhub.workmassivelikes.cache;
 
 /**
  * 描述 TopK 数据结构中的元素
+ *
+ * @author <a href="https://github.com/limou3434">limou3434</a>
  */
 public record Item(String key, int count) {
 }

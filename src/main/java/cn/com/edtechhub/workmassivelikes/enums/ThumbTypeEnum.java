@@ -3,7 +3,9 @@ package cn.com.edtechhub.workmassivelikes.enums;
 import lombok.Getter;
 
 /**
- * 临时记录中的点赞类型
+ * 临时记录中的点赞枚举体
+ *
+ * @author <a href="https://github.com/limou3434">limou3434</a>
  */
 @Getter
 public enum ThumbTypeEnum {

@@ -6,9 +6,9 @@ import cn.com.edtechhub.workmassivelikes.request.ThumbUnDoRequest;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
- * @author Limou
- * @description 针对表【thumb(点赞表)】的数据库操作Service
- * @createDate 2025-04-23 12:30:45
+ * 点赞服务声明
+ *
+ * @author <a href="https://github.com/limou3434">limou3434</a>
  */
 public interface ThumbService extends IService<Thumb> {
 

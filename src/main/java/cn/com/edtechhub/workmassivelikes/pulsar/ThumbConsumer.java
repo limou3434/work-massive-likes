@@ -19,6 +19,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+/**
+ * 点赞消费者
+ *
+ * @author <a href="https://github.com/limou3434">limou3434</a>
+ */
 @Service // Spring 自动注册为 Bean
 @Slf4j
 public class ThumbConsumer {

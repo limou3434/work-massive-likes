@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 
 
 /**
- * 设备工具类
+ * 设备工具
  *
  * @author <a href="https://github.com/limou3434">limou3434</a>
  */
@@ -20,8 +20,6 @@ public class DeviceUtil {
 
     /**
      * 根据请求获取设备信息
-     * @param request
-     * @return
      */
     public static String getRequestDevice(HttpServletRequest request) {
         String userAgentStr = request.getHeader(Header.USER_AGENT.toString());

@@ -8,6 +8,11 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+/**
+ * 点赞事件 DTO
+ *
+ * @author <a href="https://github.com/limou3434">limou3434</a>
+ */
 @Data
 @Builder
 @NoArgsConstructor

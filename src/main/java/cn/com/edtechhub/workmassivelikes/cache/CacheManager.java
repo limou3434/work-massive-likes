@@ -7,6 +7,11 @@ import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
 
+/**
+ * 缓存管理
+ *
+ * @author <a href="https://github.com/limou3434">limou3434</a>
+ */
 @Component
 public class CacheManager {
 

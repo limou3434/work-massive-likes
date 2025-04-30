@@ -7,8 +7,9 @@ import java.util.Date;
 import lombok.Data;
 
 /**
- * 点赞表
- * @TableName thumb
+ * 点赞实体
+ *
+ * @author <a href="https://github.com/limou3434">limou3434</a>
  */
 @TableName(value ="thumb")
 @Data

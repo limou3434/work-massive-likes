@@ -2,6 +2,8 @@ package cn.com.edtechhub.workmassivelikes.contant;
 
 /**
  * Redis 键名前缀常量
+ *
+ * @author <a href="https://github.com/limou3434">limou3434</a>
  */
 public interface ThumbConstant {
 

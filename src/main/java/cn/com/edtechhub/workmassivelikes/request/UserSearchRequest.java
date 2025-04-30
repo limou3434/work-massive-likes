@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 import java.io.Serializable;
 
 /**
- * 查询用户请求
+ * 用户搜索请求
  *
  * @author <a href="https://github.com/limou3434">limou3434</a>
  */

@@ -4,6 +4,8 @@ import cn.com.edtechhub.workmassivelikes.contant.ThumbConstant;
 
 /**
  * 获取键名前缀工具
+ *
+ * @author <a href="https://github.com/limou3434">limou3434</a>
  */
 public class RedisKeyUtil {
 

@@ -10,8 +10,6 @@ import cn.com.edtechhub.workmassivelikes.mapper.ThumbMapper;
 import cn.com.edtechhub.workmassivelikes.model.dto.ThumbEventDto;
 import cn.com.edtechhub.workmassivelikes.model.entity.Blog;
 import cn.com.edtechhub.workmassivelikes.model.entity.Thumb;
-import cn.com.edtechhub.workmassivelikes.request.ThumbDoRequest;
-import cn.com.edtechhub.workmassivelikes.request.ThumbUnDoRequest;
 import cn.com.edtechhub.workmassivelikes.service.BlogService;
 import cn.com.edtechhub.workmassivelikes.service.ThumbService;
 import cn.com.edtechhub.workmassivelikes.service.UserService;
@@ -96,7 +94,7 @@ import java.util.List;
    (10)在点赞发生意外时, 处理这种异常情况...
 
 4. [增加补偿机制]
-   一些极限情况下, 系统异常将导致数据不一致问题, 因为我们上面的设计是根据时间片来备份到 MySQL 中的, 可能会出现备份时部分旧的分片没有被备份, 我们还需要实现一个补偿任务, 在 job 包下创建 SyncThumb2DBCompensatory
+   一些极限情况下, 系统异常将导致数据不一致问题, 因为我们上面的设计是根据时间片来备份到 MySQL 中的, 可能会出现备份时部分旧的分片没有被备份, 我们还需要实现一个补偿任务, 在 job 包下创建 SyncThumb2DBCompensatoryJob
 
 5. [多级缓存优化]
    在访问速度问题上, 我们还可以使用多级缓存问题来进一步提高访问速度
@@ -211,12 +209,25 @@ import java.util.List;
    为了监控 Redis 的性能和缓存命中率, 我们需要添加 Redis Exporter
    这个问题可以后面再说...
 
+13. [高可用优化]
+   比如目前系统仍然存在单点故障风险, 当 MySQL/TiDB、Redis、Pulsar 出现故障时, 可能导致整个服务不可用, 缺乏有效的降级机制和容错策略
+   因此需要从几个角度来实现高可用, 不过无论是哪个组件出现不可用, 都是以抛出异常为表现, 就可以引入 Sentinel 组件来进行异常检测, 然后再进行熔断降级处理
+   - 数源高可用: 不使用 MySQL, 使用 TiDB 作为分布式数据库已具备基础的高可用性, 但仍可以进一步增强容灾能力, 比如通过
+        (1)多中心部署: 在不同地域部署 TiDB 集群, 熔断降级为不同集群的数据中心, 平时这些数据中心是工作数据中心和备份数据中心的关系
+        (2)两地三中心架构: 更高级别的保护可采用两地三中心架构, 包括工作数据中心、同城灾备数据中心、异地灾备数据中心, 防范城市级灾难
+   - 缓存高可用: 在极端情况下, 当 Redis 服务不可用时, 扩大 Caffeine 本地缓存容量, 临时存储热点数据, 同时对非热点数据降级为直接查询数据库, 同时解决 "缓存击穿、缓存雪崩、缓存穿透" 的问题
+        (1)主从复制架构
+        (2)哨兵模式架构
+        (3)集群节点架构
+        还可以引入布隆过滤器来实现针对缓存的防护机制
+   - 队列高可用: Pulsar 也天然支持集群化, 将异步点赞处理转为同步处理, 也可以采用我们已经实现过的策略, 使用 Redis 暂存点赞信息, 然后批量同步到数据库
+   这个问题可以后面再说...
 */
 
 /**
- * @author Limou
- * @description 针对表【thumb(点赞表)】的数据库操作Service实现
- * @createDate 2025-04-23 12:30:45
+ * 点赞服务实现
+ *
+ * @author <a href="https://github.com/limou3434">limou3434</a>
  */
 @Service
 @Slf4j

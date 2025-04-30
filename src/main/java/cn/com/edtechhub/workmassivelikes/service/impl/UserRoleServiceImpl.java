@@ -7,10 +7,10 @@ import cn.com.edtechhub.workmassivelikes.mapper.UserRoleMapper;
 import org.springframework.stereotype.Service;
 
 /**
-* @author Limou
-* @description 针对表【user_role(用户角色表)】的数据库操作Service实现
-* @createDate 2025-04-23 00:43:36
-*/
+ * 用户角色服务实现
+ *
+ * @author <a href="https://github.com/limou3434">limou3434</a>
+ */
 @Service
 public class UserRoleServiceImpl extends ServiceImpl<UserRoleMapper, UserRole>
     implements UserRoleService{

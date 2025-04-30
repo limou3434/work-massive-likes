@@ -5,6 +5,11 @@ import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 
+/**
+ * 博客搜索请求
+ *
+ * @author <a href="https://github.com/limou3434">limou3434</a>
+ */
 @EqualsAndHashCode(callSuper = true) // 自动生成 equals() 和 hashCode(), callSuper = true 使得 equals() 和 hashCode() 方法同时考虑 PageRequest 和 UserSearchRequest 的字段, 避免出现意料之外的情况
 @Data
 public class BlogSearchRequest extends PageRequest implements Serializable {

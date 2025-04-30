@@ -5,6 +5,11 @@ import lombok.Data;
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * 博客 DTO
+ *
+ * @author <a href="https://github.com/limou3434">limou3434</a>
+ */
 @Data
 public class BlogDto implements Serializable {
 

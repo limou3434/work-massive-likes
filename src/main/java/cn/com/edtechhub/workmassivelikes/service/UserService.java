@@ -11,10 +11,10 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import java.util.List;
 
 /**
-* @author Limou
-* @description 针对表【user(用户信息表)】的数据库操作Service
-* @createDate 2025-04-23 00:43:35
-*/
+ * 用户服务声明
+ *
+ * @author <a href="https://github.com/limou3434">limou3434</a>
+ */
 public interface UserService extends IService<User> {
 
     /**
