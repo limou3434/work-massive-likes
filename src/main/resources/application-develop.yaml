@@ -1,6 +1,0 @@
-spring:
-  datasource:
-    url: jdbc:mysql://10.10.174.232:3306/work_massive_likes
-  data:
-    redis:
-      host: 10.10.174.232

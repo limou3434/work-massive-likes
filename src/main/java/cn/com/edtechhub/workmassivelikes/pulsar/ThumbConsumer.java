@@ -8,14 +8,8 @@ import cn.hutool.core.lang.Pair;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.pulsar.client.api.DeadLetterPolicy;
 import org.apache.pulsar.client.api.Message;
-import org.apache.pulsar.client.api.MessageId;
-import org.apache.pulsar.client.api.RedeliveryBackoff;
-import org.apache.pulsar.client.impl.MultiplierRedeliveryBackoff;
 import org.apache.pulsar.common.schema.SchemaType;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.pulsar.annotation.PulsarListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -133,54 +127,54 @@ public class ThumbConsumer {
         batchUpdateBlogs(countMap);
     }
 
-    /**
-     * 死信队列监听器(消费者)
-     */
-    @PulsarListener(topics = "thumb-dlq-topic")
-    public void consumerDlq(Message<ThumbEventDto> message) {
-        MessageId messageId = message.getMessageId();
-        log.info("异常消息 {} 入库, 通知相关人员 {} 处理", messageId, "898738804@qq.com");
-    }
-
-    /**
-     * 配置 ACK 失败重试策略
-     */
-    @Bean
-    @Lazy
-    public RedeliveryBackoff negativeAckRedeliveryBackoff() {
-        log.debug("ACK 失败重试策略被启用");
-        return MultiplierRedeliveryBackoff.builder()
-                .minDelayMs(1000) // 初始延迟 1 秒
-                .maxDelayMs(60_000) // 最大延迟 60 秒
-                .multiplier(2) // 每次重试延迟倍数
-                .build();
-    }
-
-    /**
-     * 配置 ACK 超时重试策略
-     */
-    @Bean
-    @Lazy
-    public RedeliveryBackoff ackTimeoutRedeliveryBackoff() {
-        log.debug("ACK 超时重试策略被启用");
-        return MultiplierRedeliveryBackoff.builder()
-                .minDelayMs(5000) // 初始延迟 5 秒
-                .maxDelayMs(300_000) // 最大延迟 300 秒
-                .multiplier(3) // 每次重试延迟倍数
-                .build();
-    }
-
-    /**
-     * 配置死信队列
-     */
-    @Bean
-    @Lazy
-    public DeadLetterPolicy deadLetterPolicy() {
-        return DeadLetterPolicy.builder()
-                .maxRedeliverCount(3) // 最大重试次数
-                .deadLetterTopic("thumb-dlq-topic") // 死信主题名称
-                .build();
-    }
+//    /**
+//     * 死信队列监听器(消费者)
+//     */
+//    @PulsarListener(topics = "thumb-dlq-topic")
+//    public void consumerDlq(Message<ThumbEventDto> message) {
+//        MessageId messageId = message.getMessageId();
+//        log.info("异常消息 {} 入库, 通知相关人员 {} 处理", messageId, "898738804@qq.com");
+//    }
+//
+//    /**
+//     * 配置 ACK 失败重试策略
+//     */
+//    @Bean
+//    @Lazy
+//    public RedeliveryBackoff negativeAckRedeliveryBackoff() {
+//        log.debug("ACK 失败重试策略被启用");
+//        return MultiplierRedeliveryBackoff.builder()
+//                .minDelayMs(1000) // 初始延迟 1 秒
+//                .maxDelayMs(60_000) // 最大延迟 60 秒
+//                .multiplier(2) // 每次重试延迟倍数
+//                .build();
+//    }
+//
+//    /**
+//     * 配置 ACK 超时重试策略
+//     */
+//    @Bean
+//    @Lazy
+//    public RedeliveryBackoff ackTimeoutRedeliveryBackoff() {
+//        log.debug("ACK 超时重试策略被启用");
+//        return MultiplierRedeliveryBackoff.builder()
+//                .minDelayMs(5000) // 初始延迟 5 秒
+//                .maxDelayMs(300_000) // 最大延迟 300 秒
+//                .multiplier(3) // 每次重试延迟倍数
+//                .build();
+//    }
+//
+//    /**
+//     * 配置死信队列
+//     */
+//    @Bean
+//    @Lazy
+//    public DeadLetterPolicy deadLetterPolicy() {
+//        return DeadLetterPolicy.builder()
+//                .maxRedeliverCount(3) // 最大重试次数
+//                .deadLetterTopic("thumb-dlq-topic") // 死信主题名称
+//                .build();
+//    }
 
     /**
      * 批量插入点赞记录

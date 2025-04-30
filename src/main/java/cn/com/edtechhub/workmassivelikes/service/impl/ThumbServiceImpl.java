@@ -152,6 +152,7 @@ import java.util.List;
    有时间可以处理一下
 
    另外还可以继续结合本地缓存的方案, 有时间加上
+   这个问题可以后面再说...
 
 8. [修复非法点赞]
    由于我们跳过了一层数据库的校验, 把点赞的逻辑直接迁移到了 Redis 中, 然后开启定期的备份, 但此时无法校验接口中的 blogId 是否存在, 这会导致用户理论上来说可以对不存在的文章进行点赞
@@ -169,7 +170,7 @@ import java.util.List;
    (5)用户久未登录, 异步虚拟线程工作时, 用 MySQL 备份备份键值对, 用 Redis 删除过期键值对
    (6)用户突然登陆, 由于 Redis 中没有对应的数据, 所以需要查询数据库, 但是还需要把数据库中关于该用户的点赞记录重新推送到 Redis 中, 这样后续读取就不会一直访问两个数据库
    这个问题可以后面再说...
-   
+
 10. [分布式数据库]
    单机的性能是有极限的, 我们需要分布式的数据库, 但是传统的 MySQL 数据库集群方案比较复杂, 因此我们选择使用 TiDB 来替代 MySQL
    最基础的 TiDB 测试集群通常由 2 个 TiDB 实例、3 个 TiKV 实例、3 个 PD 实例、可选的 TiFlash 实例构成
@@ -177,7 +178,22 @@ import java.util.List;
    - TiKV Server: 数据分片存储
    - PD Server: 确保调度中心高可用
    - TiFlash: 用于分析查询加速
-   通过 TiUP Playground 可以快速搭建出上述的一套基础测试集群, 另外个人提议, 不要使用 Docker 部署和数据状态有关的组件, 尤其是需要持久化的数据
+   通过 TiUP Playground 可以快速搭建出上述的一套基础测试集群, 另外个人提议, 不要使用 Docker 部署和数据状态有关的组件, 尤其是需要持久化的数据, 并且也推荐直接部署在存储用的机器上
+
+   由于 TiDB 兼容 MySQL 协议, 所以很多操作是和 MySQL 类似的
+
+   curl --proto '=https' --tlsv1.2 -sSf https://tiup-mirrors.pingcap.com/install.sh | sh && source ~/.bashrc
+   tiup playground --tag thumb / tiup playground --tag thumb --tiflash 0 (控制台账户默认为 root 密码默认为空)
+   tiup playground --tag thumb cleanup
+   - 全量数据同步: 使用 TiDB DM 工具进行初始数据迁移
+   - 增量数据同步: 配置 MySQL Binlog 到 TiDB 的实时同步
+   - 双写验证阶段: 应用同时写入 MySQL 和 TiDB，比对数据一致性
+   - 切换读流量: 将读请求切换到 TiDB
+   - 切换写流量: 确认无问题后将写请求切换到 TiDB
+   - 下线旧 MySQL: 完成迁移后, 逐步下线 MySQL 实例
+   - IDEA 快速迁移: 导入/导出 -> mysqldump -> ...
+
+   和 MySQL 的 3306 类似, TIDB 的端口号为 4000, 然后修改配置文件中的端口号就够了, 整个过程是很丝滑, 只需要运维人员集群化 TIDB 即可
 */
 
 /**

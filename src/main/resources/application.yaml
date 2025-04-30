@@ -12,8 +12,8 @@ spring:
       enabled: false # 取消刷新
   ## 配置数源
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/work_massive_likes
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:4000/work_massive_likes # 3306 为 MySQL, 4000 为 TIDB
     username: wml
     password: Qwe54188_
   ## 配置缓存
