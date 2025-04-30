@@ -12,7 +12,7 @@ spring:
       enabled: false # 取消刷新
   ## 配置数源
   datasource:
-#    driver-class-name: com.mysql.cj.jdbc.Driver
+    # driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://127.0.0.1:4000/work_massive_likes # 3306 为 MySQL, 4000 为 TIDB
     username: wml
     password: Qwe54188_
@@ -51,6 +51,10 @@ server:
   address: 127.0.0.1
   ## 配置端口
   port: 8000
+  ## 配置伺服
+  tomcat:
+    threads:
+      max: 1024
 
 # 配置日志
 logging:
@@ -78,7 +82,7 @@ knife4j:
 # 配置 MyBatisPlus
 mybatis-plus:
   ## 配置盐值
-  salt: work-user-centre
+  salt: edtechhub
   configuration:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

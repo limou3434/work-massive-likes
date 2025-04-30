@@ -60,6 +60,8 @@ public class ThumbConsumer {
                 .filter(Objects::nonNull) // 过滤无效消息(可能是空消息或反序列化失败)
                 .toList();
 
+        log.debug("提取事件并过滤无效消息: {}", events);
+
         // 按 (userId, blogId) 分组, 并获取每个分组的最新事件
         Map<Pair<Long, Long>, ThumbEventDto> latestEvents = events
                 .stream()
@@ -76,6 +78,8 @@ public class ThumbConsumer {
         AtomicReference<Boolean> needRemove = new AtomicReference<>(false); // 用于记录是否需要删除数据库中的点赞记录, 这是一个原子类型, 这个变量是个标记位
 
         LambdaQueryWrapper<Thumb> wrapper = new LambdaQueryWrapper<>();
+
+        log.debug("分组结果: {}", latestEvents);
 
         // 遍历分组结果
         latestEvents.forEach((userAndBlogPair, event) -> {

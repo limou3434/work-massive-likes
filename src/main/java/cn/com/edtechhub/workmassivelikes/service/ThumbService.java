@@ -1,6 +1,8 @@
 package cn.com.edtechhub.workmassivelikes.service;
 
 import cn.com.edtechhub.workmassivelikes.model.entity.Thumb;
+import cn.com.edtechhub.workmassivelikes.request.ThumbDoRequest;
+import cn.com.edtechhub.workmassivelikes.request.ThumbUnDoRequest;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**

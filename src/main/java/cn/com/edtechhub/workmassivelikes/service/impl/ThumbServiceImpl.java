@@ -10,6 +10,8 @@ import cn.com.edtechhub.workmassivelikes.mapper.ThumbMapper;
 import cn.com.edtechhub.workmassivelikes.model.dto.ThumbEventDto;
 import cn.com.edtechhub.workmassivelikes.model.entity.Blog;
 import cn.com.edtechhub.workmassivelikes.model.entity.Thumb;
+import cn.com.edtechhub.workmassivelikes.request.ThumbDoRequest;
+import cn.com.edtechhub.workmassivelikes.request.ThumbUnDoRequest;
 import cn.com.edtechhub.workmassivelikes.service.BlogService;
 import cn.com.edtechhub.workmassivelikes.service.ThumbService;
 import cn.com.edtechhub.workmassivelikes.service.UserService;
@@ -183,7 +185,7 @@ import java.util.List;
    由于 TiDB 兼容 MySQL 协议, 所以很多操作是和 MySQL 类似的
 
    curl --proto '=https' --tlsv1.2 -sSf https://tiup-mirrors.pingcap.com/install.sh | sh && source ~/.bashrc
-   tiup playground --tag thumb / tiup playground --tag thumb --tiflash 0 (控制台账户默认为 root 密码默认为空)
+   tiup playground --tag thumb / tiup playground --tag thumb --tiflash 0 / tiup playground --tag thumb --without-monitor --tiflash 0  (控制台账户默认为 root 密码默认为空)
    tiup playground --tag thumb cleanup
    - 全量数据同步: 使用 TiDB DM 工具进行初始数据迁移
    - 增量数据同步: 配置 MySQL Binlog 到 TiDB 的实时同步
@@ -194,6 +196,21 @@ import java.util.List;
    - IDEA 快速迁移: 导入/导出 -> mysqldump -> ...
 
    和 MySQL 的 3306 类似, TIDB 的端口号为 4000, 然后修改配置文件中的端口号就够了, 整个过程是很丝滑, 只需要运维人员集群化 TIDB 即可
+
+11. [高强压力测试]
+   在 JMeter 中设置 "启动时间、线程数、循环次数" 这 3 个值, 线程数 * 循环次数 = 要测试的请求总数, 启动时间的作用是控制线程的启动速率从而控制请求速率
+
+   线程数：5010 个 / 组
+   启动时长：5 秒
+   循环次数：10 组
+
+12. [可观测性优化]
+   使用 tiup playground 命令一键启动了 TiDB, 同时这个命令会默认启动 Prometheus 和 Grafana, 它跟 tiup 绑定的比较深, 用起来没有那么方便
+   为了防止它跟我们后续手动安装的监控组件冲突, 需要在启动 TiDB 时禁止这两个组件, 通过 --help 命令得知, --without-monitor 可以实现这个需求
+
+   为了监控 Redis 的性能和缓存命中率, 我们需要添加 Redis Exporter
+   这个问题可以后面再说...
+
 */
 
 /**
@@ -406,6 +423,9 @@ public class ThumbServiceImpl extends ServiceImpl<ThumbMapper, Thumb> implements
 
     public Boolean thumbAddDoUseMQ(Long blogId) {
         String userId = userService.userStatus().getUserId();
+
+        log.debug("用户 {} 确认点赞博客 {}", userId, blogId);
+
         String userThumbKey = RedisKeyUtil.getUserThumbKey(userId);
 
         // 执行 Lua 脚本
@@ -442,6 +462,8 @@ public class ThumbServiceImpl extends ServiceImpl<ThumbMapper, Thumb> implements
     public Boolean thumbAddUnDoUseMQ(Long blogId) {
         String userId = userService.userStatus().getUserId();
         String userThumbKey = RedisKeyUtil.getUserThumbKey(userId);
+
+        log.debug("用户 {} 取消点赞博客 {}", userId, blogId);
 
         // 执行 Lua 脚本
         long result = redisTemplate.execute(
