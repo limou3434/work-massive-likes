@@ -1,6 +1,6 @@
 package cn.com.edtechhub.workmassivelikes.service;
 
-import cn.com.edtechhub.workmassivelikes.model.dto.UserDto;
+import cn.com.edtechhub.workmassivelikes.model.dto.UserStatusDto;
 import cn.com.edtechhub.workmassivelikes.model.entity.User;
 import cn.com.edtechhub.workmassivelikes.request.UserAddRequest;
 import cn.com.edtechhub.workmassivelikes.request.UserDeleteRequest;
@@ -60,6 +60,6 @@ public interface UserService extends IService<User> {
     /**
      * 用户状态服务
      */
-    UserDto userStatus();
+    UserStatusDto userStatus();
 
 }

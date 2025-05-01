@@ -1,7 +1,7 @@
 package cn.com.edtechhub.workmassivelikes.controller;
 
 import cn.com.edtechhub.workmassivelikes.enums.CodeBindMessageEnum;
-import cn.com.edtechhub.workmassivelikes.model.dto.UserDto;
+import cn.com.edtechhub.workmassivelikes.model.dto.UserStatusDto;
 import cn.com.edtechhub.workmassivelikes.model.entity.User;
 import cn.com.edtechhub.workmassivelikes.model.vo.UserVO;
 import cn.com.edtechhub.workmassivelikes.request.*;
@@ -126,9 +126,9 @@ public class UserController { // 通常控制层有服务层中的所有方法, 
      */
     @SaIgnore
     @GetMapping("/status")
-    public BaseResponse<UserDto> userStatus() {
-        UserDto userDto = userService.userStatus();
-        return TheResult.success(CodeBindMessageEnum.SUCCESS, userDto);
+    public BaseResponse<UserStatusDto> userStatus() {
+        UserStatusDto userStatusDto = userService.userStatus();
+        return TheResult.success(CodeBindMessageEnum.SUCCESS, userStatusDto);
     }
 
 }

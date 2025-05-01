@@ -1,20 +1,13 @@
 -- 项目数库
-DROP
-    DATABASE IF EXISTS work_massive_likes;
-CREATE
-    DATABASE work_massive_likes CHARACTER SET utf8mb4 COLLATE = utf8mb4_unicode_ci;
-USE
-    work_massive_likes;
+DROP DATABASE IF EXISTS work_massive_likes;
+CREATE DATABASE work_massive_likes CHARACTER SET utf8mb4 COLLATE = utf8mb4_unicode_ci;
+USE work_massive_likes;
 
 -- 项目用户
-DROP
-    USER IF EXISTS 'wml'@'%';
-CREATE
-    USER 'wml'@'%' IDENTIFIED BY 'Qwe54188_';
-GRANT ALL PRIVILEGES ON work_massive_likes.* TO
-    'wml'@'%';
-FLUSH
-    PRIVILEGES;
+DROP USER IF EXISTS 'wml'@'%';
+CREATE USER 'wml'@'%' IDENTIFIED BY 'Qwe54188_';
+GRANT ALL PRIVILEGES ON work_massive_likes.* TO 'wml'@'%';
+FLUSH PRIVILEGES;
 
 -- 项目数表
 CREATE TABLE `user_role`

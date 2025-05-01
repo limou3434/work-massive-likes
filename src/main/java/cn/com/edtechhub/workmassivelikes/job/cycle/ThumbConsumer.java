@@ -1,4 +1,4 @@
-package cn.com.edtechhub.workmassivelikes.pulsar;
+package cn.com.edtechhub.workmassivelikes.job.cycle;
 
 import cn.com.edtechhub.workmassivelikes.mapper.BlogMapper;
 import cn.com.edtechhub.workmassivelikes.model.dto.ThumbEventDto;

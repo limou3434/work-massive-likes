@@ -5,7 +5,7 @@ import cn.com.edtechhub.workmassivelikes.contant.UserConstant;
 import cn.com.edtechhub.workmassivelikes.enums.CodeBindMessageEnum;
 import cn.com.edtechhub.workmassivelikes.exception.BusinessException;
 import cn.com.edtechhub.workmassivelikes.mapper.UserMapper;
-import cn.com.edtechhub.workmassivelikes.model.dto.UserDto;
+import cn.com.edtechhub.workmassivelikes.model.dto.UserStatusDto;
 import cn.com.edtechhub.workmassivelikes.model.entity.User;
 import cn.com.edtechhub.workmassivelikes.request.UserAddRequest;
 import cn.com.edtechhub.workmassivelikes.request.UserDeleteRequest;
@@ -157,16 +157,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     @Override
-    public UserDto userStatus() {
-        UserDto userDto = new UserDto();
-        userDto.setIsLogin(StpUtil.isLogin());
-        if (!userDto.getIsLogin()) {
-            return userDto;
+    public UserStatusDto userStatus() {
+        UserStatusDto userStatusDto = new UserStatusDto();
+        userStatusDto.setIsLogin(StpUtil.isLogin());
+        if (!userStatusDto.getIsLogin()) {
+            return userStatusDto;
         }
-        userDto.setTokenName(StpUtil.getTokenName());
-        userDto.setTokenTimeout(String.valueOf(StpUtil.getTokenTimeout()));
-        userDto.setUserId(String.valueOf(StpUtil.getLoginId()));
-        return userDto;
+        userStatusDto.setTokenName(StpUtil.getTokenName());
+        userStatusDto.setTokenTimeout(String.valueOf(StpUtil.getTokenTimeout()));
+        userStatusDto.setUserId(String.valueOf(StpUtil.getLoginId()));
+        return userStatusDto;
     }
 
     /**
