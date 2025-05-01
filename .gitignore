@@ -1,8 +1,7 @@
-.idea/
-target/
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+**.idea/
+**node_modules/
+**.next/
+**target/
 
 ### STS ###
 .apt_generated
