@@ -18,7 +18,7 @@ import java.util.List;
  *
  * @author <a href="https://github.com/limou3434">limou3434</a>
  */
-@Component
+@Component // 保证此类被 SpringBoot 扫描，完成 Sa-Token 的自定义权限验证扩展
 @Slf4j
 public class SaTokenStpInterfaceImpl implements StpInterface {
 

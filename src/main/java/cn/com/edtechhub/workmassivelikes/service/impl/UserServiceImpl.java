@@ -36,6 +36,9 @@ import java.util.List;
 public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         implements UserService {
 
+    /**
+     * 注入 MyBatis Plus 配置依赖
+     */
     @Resource
     private MyBatisPlusConfig mybatisPlusConfig;
 

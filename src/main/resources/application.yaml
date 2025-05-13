@@ -85,11 +85,18 @@ knife4j:
 
 # 配置 MyBatisPlus
 mybatis-plus:
-  ## 配置盐值
+  ## 配置加密盐值
   salt: edtechhub
+  ## 下划线转驼峰
   configuration:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  ## 配置逻辑删除
+  global-config:
+    db-config:
+      logic-delete-field: deleted # 全局逻辑删除的实体字段名
+      logic-delete-value: 1 # 逻辑已删除值（默认为 1）
+      logic-not-delete-value: 0 # 逻辑未删除值（默认为 0）
 
 # 配置 Sa-Token
 sa-token: # 默认开启 Redis 配置将自动支持 Sa-token 使用 Redis 存储认证相关键值对, 想要关掉需要去除相关依赖
